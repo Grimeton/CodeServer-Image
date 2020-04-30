@@ -1,0 +1,1 @@
+../../../ubuntu/all/system_root/installer.sh

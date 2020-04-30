@@ -1,0 +1,287 @@
+#!/usr/bin/env bash
+#
+#
+# Copyright (c) 2020, <grimeton@gmx.net>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the software/distribution.
+#
+# 3. If we meet some day, and you think this stuff is worth it,
+#    you can buy me a beer in return, Grimeton.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+echo "............"
+set -o nounset
+
+declare -gx __INIT_VERSION="0.01"
+
+## load basic functions needed.
+echo " -- (INIT) Loading main library..."
+if [[ -f "/usr/local/lib/init/lib_loader.sh" ]]; then
+    if source "/usr/local/lib/init/lib_loader.sh"; then
+        echo " -- (INIT) Success."
+    else
+        echo " -- (INIT) ERROR: Cannot load init library ($?). Exiting."
+        exit 253
+    fi
+else
+    echo " -- (INIT) ERROR: Cannot find init library ($?). Exiting."
+    exit 253
+fi
+
+# note to self: DO NOT MOVE THIS ABOVE THIS POINT
+__log i -- "(INIT) Loading packages...\n"
+for __T_PACKAGE in "init" "installer" "package_manager" "base_print" "system" "misc"; do
+    if __lib_package_load "${__T_PACKAGE}"; then
+        __log i -- "(INIT) Package '${__T_PACKAGE}' loaded successfully.\n"
+    else
+        __log e -- "(INIT) Could not load package: '${__T_PACKAGE}' ($?).\n"
+    fi
+done
+
+__log i -- "(INIT) Initializing Package Management...\n"
+if __pm_init; then
+    __log i -- "(INIT) Success.\n"
+else
+    __log e -- "(INIT) Error ($?).\n"
+    exit 254
+fi
+
+__log i -- "(INIT) Loading settings...\n"
+if [[ -f "${G_LIB_DIR}/settings.conf" ]]; then
+    if source "${G_LIB_DIR}/settings.conf"; then
+        __log i -- "(INIT) Success.\n"
+    else
+        __log e -- "(INIT) Could not load 'settings.conf' ($?). Exiting.\n"
+        exit 123
+    fi
+else
+    __log e -- "(INIT) Could not find 'settings.conf' ($?).\n"
+    exit 123
+fi
+
+if __init_codeserver_startup_options_gather; then
+    __log i -- "(INIT) Gathering CodeServer startup options successful.\n"
+else
+    __log e -- "(INIT) Could not get CodeServer startup options ($?).\n"
+fi
+
+__log i -- "(INIT) Loading INIT modules...\n"
+for __T_MODULE in "${G_LIB_DIR}/modules/"*.sh; do
+    if [[ -f "${__T_MODULE}" ]]; then
+        if source "${__T_MODULE}"; then
+            __log i -- "(INIT) Loaded module '${__T_MODULE}' successfully.\n"
+        else
+            __log e -- "(INIT) Could not load module '${__T_MODULE}' ($?).\n"
+        fi
+    fi
+done
+
+declare -Ag __SETTINGS=()
+declare -Ag __INIT_RESULTS=()
+declare -Ag __INIT_RESULTS_FEATURES=()
+
+if [[ ! -f /.initenv ]]; then
+
+    __log_banner i -- "(INIT) START: Image configuration."
+    declare -a __T_INIT_ARRAYS=()
+    declare __T_ERROR=0
+
+    if __init_stage_run_fromto 1 200; then
+        __log i -- "(INIT) Running stages from '1' to '200' sucessfull.\n"
+    else
+        __T_ERROR=$?
+        __log e -- "(INIT) Running stages from '1' to '200' not successfull (${__T_ERROR}).\n"
+        exit ${__T_ERROR}
+    fi
+
+    if __init_stage_run_fromto 201 400; then
+        __log i -- "(INIT) Running stages from '201' to '400' sucessfull.\n"
+    else
+        __T_ERROR=$?
+        __log e -- "(INIT) Problems running stages from '201' to '400' (${__T_ERROR}).\n"
+        exit ${__T_ERROR}
+    fi
+
+    if __init_stage_run_fromto 401 600; then
+        __log i -- "(INIT) Running stages from '401' to '600' sucessfull.\n"
+    else
+        __T_ERROR=$?
+        __log e -- "(INIT) Problem running stages from '401' to '600' (${__T_ERROR}).\n"
+        exit ${__T_ERROR}
+    fi
+
+    if __init_stage_run_fromto 601 700; then
+        __log i -- "(INIT) Running stages from '601' to '700' sucessfull.\n"
+    else
+        __T_ERROR=$?
+        __log e -- "(INIT) Problem running stages from '601' to '700'.\n"
+        exit ${__T_ERROR}
+    fi
+
+    if __init_stage_run_fromto 701 800; then
+        __log i -- "(INIT) Running stages from '701' to '800' sucessfull.\n"
+    else
+        __T_ERROR=$?
+        __log e -- "(INIT) Problem running stages from '701' to '800' (${__T_ERROR}).\n"
+        exit ${__T_ERROR}
+    fi
+
+    if __init_stage_run_fromto 801 900; then
+        __log i -- "(INIT) Running stages from '801' to '900' sucessfull.\n"
+    else
+        __T_ERROR=$?
+        __log e -- "(INIT) Problem running stages from '801' to '900' (${__T_ERROR}).\n"
+    fi
+
+    if __init_stage_run_fromto 901 1000; then
+        __log i -- "(INIT) Running stages from '901' to '1000' sucessfull.\n"
+    else
+        __T_ERROR=$?
+        __log e -- "(INIT) Problem running stages from '901' to '1000' (${__T_ERROR}).\n"
+    fi
+
+elif source /.initenv; then
+    true
+else
+    __T_ERROR=$?
+    __log e -- "(INIT) Problems loading '/.initenv' (${__T_ERROR}).\n"
+    exit 249
+fi
+
+__log_banner i -- "Preparing start of server..."
+declare -ag __START_PARAMETERS=()
+declare -ag __START_SCRIPTS=()
+
+if __init_stage_run_fromto 1001 1250; then
+    __log i -- "(INIT) Running stages from '1001' to '1250' sucessfull.\n"
+else
+    __T_ERROR=$?
+    __log e -- "(INIT) Problems preparing the start. Stages '1001' to '1250' (${__T_ERROR}).\n"
+    return ${__T_ERROR}
+fi
+
+if __init_stage_run_fromto 1251 1500; then
+    __log i -- "(INIT) Running stages from '1251' to '1500' sucessfull.\n"
+else
+    __T_ERROR=$?
+    __log e -- "(INIT) Problems preparing the start. Stages '1251' to '1500' (${__T_ERROR}).\n"
+    return ${__T_ERROR}
+fi
+
+if __init_stage_run_fromto 1501 1750; then
+    __log i -- "(INIT) Running stages from '1501' to '1750' sucessfull.\n"
+else
+    __T_ERROR=$?
+    __log e -- "(INIT) Problems preparing the start. Stages '1501' to '1750' (${__T_ERROR}).\n"
+    return ${__T_ERROR}
+fi
+
+if __init_stage_run_fromto 1751 2000; then
+    __log i -- "(INIT) Running stages from '1751' to '2000' sucessfull.\n"
+else
+    __T_ERROR=$?
+    __log e -- "(INIT) Problems preparing the start. Stages '1751' to '2000' (${__T_ERROR}).\n"
+    return ${__T_ERROR}
+fi
+if __aarray_exists __INIT_RESULTS && ( [[ -z ${__LOG_VERBOSE+x} ]] || [[ "${__LOG_VERBOSE}x" != "1x" ]]); then
+    declare -Agx __G_TABLE_FORMAT_FUNCTION=()
+    declare __T_CN="COLUMN1"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_ALIGN]="c"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_HEADER_TEXT]="Stage"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_HEADER_ALIGN]="c"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_NAME_REGEX_FORMULA]='^(.+)$'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_NAME_REGEX_MATCH]=1
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_DISPLAY_NAME]=1
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_DISPLAY_NAME_REGEX]='^([0-9]+)__STAGE([0-9]+)__(.+)$'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_DISPLAY_NAME_REGEX_INDEX]=2
+    unset __T_CN
+
+    declare __T_CN="COLUMN2"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_ALIGN]="c"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_HEADER_TEXT]="Function"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_HEADER_ALIGN]="c"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_NAME_REGEX_FORMULA]='^(.+)$'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_NAME_REGEX_MATCH]=1
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_DISPLAY_NAME]=1
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_DISPLAY_NAME_REGEX]='^([0-9]+)__STAGE([0-9]+)__(.+)$'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_DISPLAY_NAME_REGEX_INDEX]=3
+    unset __T_CN
+    declare __T_ARRAYNAME="__G_TABLE_FORMAT_FUNCTION_COLUMN3_PREFIX_ARRAY_$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+    declare -Agx "${__T_ARRAYNAME}=()"
+    declare -n __G_TABLE_FORMAT_FUNCTION_COLUMN3_PREFIX_ARRAY="${__T_ARRAYNAME}"
+    __G_TABLE_FORMAT_FUNCTION_COLUMN3_PREFIX_ARRAY[0]='\u001b[32m'
+    __G_TABLE_FORMAT_FUNCTION_COLUMN3_PREFIX_ARRAY[MISSING]='\u001b[33m'
+    unset __T_ARRAYNAME
+    declare __T_ARRAYNAME="__G_TABLE_FORMAT_FUNCTION_COLUMN3_SUFFIX_ARRAY_$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+    declare -Agx "${__T_ARRAYNAME}=()"
+    declare -n __G_TABLE_FORMAT_FUNCTION_COLUMN3_SUFFIX_ARRAY="${__T_ARRAYNAME}"
+    __G_TABLE_FORMAT_FUNCTION_COLUMN3_SUFFIX_ARRAY[0]='\u001b[0m'
+    __G_TABLE_FORMAT_FUNCTION_COLUMN3_SUFFIX_ARRAY[MISSING]='\u001b[0m'
+
+    for i in {1..254}; do
+        __G_TABLE_FORMAT_FUNCTION_COLUMN3_PREFIX_ARRAY[${i}]='\u001b[31m'
+        __G_TABLE_FORMAT_FUNCTION_COLUMN3_SUFFIX_ARRAY[${i}]='\u001b[0m'
+    done
+
+    declare __T_CN="COLUMN3"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_ALIGN]="center"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_HEADER_TEXT]="STATUS"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_HEADER_ALIGN]="center"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_NAME_REGEX_FORMULA]='^(.+)$'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_NAME_REGEX_MATCH]=1
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_REGEX_FORMULA]='^([0-254]|MISSING)$'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_REGEX_MATCH_PREFIX_ARRAY]="${!__G_TABLE_FORMAT_FUNCTION_COLUMN3_PREFIX_ARRAY}"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_REGEX_MATCH_SUFFIX_ARRAY]="${!__G_TABLE_FORMAT_FUNCTION_COLUMN3_SUFFIX_ARRAY}"
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_REGEX_MATCH_PREFIX]='\u001b[35m'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_REGEX_MATCH_SUFFIX]='\u001b[0m'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_REGEX_NOMATCH_PREFIX]='\u001b[31m'
+    __G_TABLE_FORMAT_FUNCTION[${__T_CN}_DATA_VALUE_REGEX_NOMATCH_SUFFIX]='\u001b[0m'
+    unset __T_CN
+
+    declare -p __G_TABLE_FORMAT_FUNCTION >/definitions.sh
+    declare -p __G_TABLE_FORMAT_FUNCTION_COLUMN3_PREFIX_ARRAY >>/definitions.sh
+    declare -p __G_TABLE_FORMAT_FUNCTION_COLUMN3_SUFFIX_ARRAY >>/definitions.sh
+    declare -p __INIT_RESULTS >>results.sh
+    __print_table __INIT_RESULTS __G_TABLE_FORMAT_FUNCTION
+fi
+
+__init_results_show
+
+__log_banner i -- "Starting server..."
+
+cd "${__SETTINGS[USER_HOME]}"
+
+if [[ ${#__START_SCRIPTS[@]} -gt 0 ]]; then
+    for __T_START_SCRIPT in "${__START_SCRIPTS[@]}"; do
+        if [[ -x "${__T_START_SCRIPT}" ]]; then
+            "${__T_START_SCRIPT}" &
+        fi
+    done
+fi
+if [[ -z ${PASSWORD:+x} ]]; then
+    declare PASSWORD=""
+fi
+
+if [[ ${#__START_PARAMETERS[@]} -gt 0 ]]; then
+    exec /usr/bin/env - PASSWORD="${PASSWORD}" /usr/local/bin/gosu "${__SETTINGS[USER]}" "${__CODESERVER_EXEC}" "${__START_PARAMETERS[@]}"
+else
+    exec /usr/bin/env - PASSWORD="${PASSWORD}" /usr/local/bin/gosu "${__SETTINGS[USER]}" "${__CODESERVER_EXEC}"
+fi
