@@ -28,7 +28,7 @@ Please report bugs via the [Github Repository](https://github.com/Grimeton/CodeS
 
 # Provided Architectures, Contents, Distributions, Releases & Tags
 ## Image Architectures
-So far, amd64 is the only supported architecure. As NodeJS has dropped x86 support, x86 builds are out of the question.
+So far, "amd64" is the only supported architecture. As NodeJS has dropped x86 support, x86 builds are out of the picture at the moment.
 
 ## Image Contents
 Each image will contain CodeServer installed in /opt/code-server/.
@@ -193,10 +193,9 @@ The following values will be recognized as being "false":
 * none
 
 ### - [PACKAGENAME]
-Some variables will allow to hold a specific package name/version instead of the true value. This is useful to install a specific version of the package you want to install and saves another variable.
-If the Package which is put into the variable does not exist, it will produce an error message (Garbage In->Garbage Out).
+Some variables will allow to hold a specific package name/version instead of the true value. This is useful to specify the version of a package to be installed without having to use another variable. If the Package which is put into the variable does not exist, it will produce an error message (Garbage In->Garbage Out).
 
-Variables that support this features will be extra marked.
+Variables that support this features will be marked.
 
 ## String values
 Some variables can hold strings, e.g. CS_INSTALL_ADDITIONAL_PACKAGES can contain a string of multiple package names separated by space, that should be installed during the first container initialization. One must use a single string with space separated package names, arrays are not supported.
