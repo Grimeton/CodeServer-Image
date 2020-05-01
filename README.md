@@ -23,6 +23,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This license affects the image itself. CodeServer, the used distribution and other software inside the image come with their own licenses.
 
+# BUGS
+Please report bugs via the [Github Repository](https://github.com/Grimeton/CodeServer-Image).
+
 # Provided Architectures, Contents, Distributions, Releases & Tags
 ## Image Architectures
 So far, amd64 is the only supported architecure. As NodeJS has dropped x86 support, x86 builds are out of the question.
