@@ -24,7 +24,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This license affects the image itself. CodeServer, the used distribution and other software inside the image come with their own licenses.
 
 # BUGS
-Please report bugs via the [Github Repository](https://github.com/Grimeton/CodeServer-Image).
+Please report bugs via the [Github Repository](https://github.com/Grimeton/CodeServer-Image/issues).
 
 # Provided Architectures, Contents, Distributions, Releases & Tags
 ## Image Architectures
