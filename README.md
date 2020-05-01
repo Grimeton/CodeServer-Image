@@ -285,6 +285,7 @@ Debian|0/Sid|docker docker-compose|Default
 Ubuntu|16.04|docker.io docker-compose|Default
 Ubuntu|18.04|docker.io docker-compose|Default
 Ubuntu|19.10|docker.io docker-compose|Default
+Ubuntu|20.04|docker.io docker-compose|Default
 
 ## - CS_INSTALL_DOCKER_SOCKET
 ### Description
@@ -327,7 +328,8 @@ Debian|10|Yes
 Debian|0/Sid|Yes
 Ubuntu|16.04|Yes
 Ubuntu|18.04|Yes
-Ubuntu|19.10|Yes
+Ubuntu|19.10|No
+Ubuntu|20.04|No
 
 ## - CS_INSTALL_MICROSOFT_POWERSHELL
 ### Description
@@ -352,6 +354,8 @@ Debian|0/Sid|Yes
 Ubuntu|16.04|Yes
 Ubuntu|18.04|Yes
 Ubuntu|19.10|No
+Ubuntu|20.04|No
+
 
 In case of Ubuntu only LTS releases are supported with a Powershell package. If you have a non-LTS version or a newer version as the current, official LTS, then you need to use a Snapcraft image of [Powershell](https://snapcraft.io/powershell). Sadly this is total overkill inside a container and requires so many changes to container security that it becomes completely pointless to use.
 
@@ -383,6 +387,7 @@ Debian|0/Sid|apt-transport-https ca-certificates curl gnupg2|Default
 Ubuntu|16.04|apt-transport-https ca-certificates curl gnupg2|Default
 Ubuntu|18.04|apt-transport-https ca-certificates curl gnupg2|Default
 Ubuntu|19.10|apt-transport-https ca-certificates curl gnupg2|Default
+Ubuntu|20.04|apt-transport-https ca-certificates curl gnupg2|Default
 
 ### Repositories
 Installs Microsoft's official repository.
@@ -399,6 +404,7 @@ Debian|0/Sid|Yes
 Ubuntu|16.04|Yes
 Ubuntu|18.04|Yes
 Ubuntu|19.10|Yes
+Ubuntu|20.04|Yes
 
 ## - CS_LISTEN_HOST
 ### Description
@@ -577,6 +583,7 @@ Debian|0/Sid|locales|Default
 Ubuntu|16.04|locales|Default
 Ubuntu|18.04|locales|Default
 Ubuntu|19.10|locales|Default
+Ubuntu|20.04|locales|Default
 
 ## - CS_LOCALES_PACKAGES
 ### Description
@@ -617,6 +624,7 @@ Debian|0/Sid|tzdata|Default
 Ubuntu|16.04|tzdata|Default
 Ubuntu|18.04|tzdata|Default
 Ubuntu|19.10|tzdata|Default
+Ubuntu|20.04|tzdata|Default
 
 ## - CS_UNMINIMIZE_IMAGE
 ### Description
@@ -641,6 +649,7 @@ Debian|0/Sid|No
 Ubuntu|16.04|No
 Ubuntu|18.04|Yes
 Ubuntu|19.10|Yes
+Ubuntu|20.04|Yes
 
 ## - CS_USER_DATA_DIR
 ### Description
