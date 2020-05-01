@@ -87,7 +87,7 @@ Debian Sid-slim* | amd64 | debian:sid-slim | debian-0-slim-latest | debian-0-sli
 Ubuntu 16.04 | amd64 | ubuntu:16.04 | ubuntu-16.04-latest | ubuntu-16.04-latest-release
 Ubuntu 18.04 | amd64 | ubuntu:18.04 | ubuntu-18.04-latest | ubuntu-18.04-latest-release
 Ubuntu 19.10 | amd64 | ubuntu:19.10 | ubuntu-19.10-latest | ubuntu-19.10-latest-release
-
+Ubuntu 20.04 | amd64 | ubuntu:20.04 | ubuntu-20.04-latest | ubuntu-20.04-latest-release
 
 '*' 'Debian/Sid' is not marked with a version number anywhere, so I picked '0' as version number. To use the 'Debian/Sid' images use the 'debian-0' prefix and remember: (S)id (I)s (D)angerous!
 
