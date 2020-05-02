@@ -31,7 +31,7 @@ if ! (return 0 2>/dev/null); then
     echo "THIS IS A LIBRARY FILE AND SHOULD NOT BE CALLED DIRECTLY. '($(realpath "${0}"))'"
     exit 254
 fi
-lib_require "base_variable"
+__lib_require "base_variable"
 function __isenabled_feature_wheel() {
 
     declare __FW_DEFAULT=""

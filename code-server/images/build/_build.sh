@@ -28,6 +28,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 set -o nounset
+declare -gx GLOBAL_DEBUG=1
+declare -gx CS_DEBUG=1
+declare -gx C_DEBUG=1
 
 declare -gx DEBIAN_FRONTEND="noninteractive"
 
@@ -144,7 +147,7 @@ fi
 __log_banner i -- "BEGIN: Loading build packages...\n"
 declare -i __T_ERROR=0
 for __T_PKG in "build" "rootlayout"; do
-    if __lib_package_load "${__T_PKG}" "${__CONFIG[BUILD_DISTRIBUTION_ID]}" "${__CONFIG[BUILD_DISTRIBUTION_VERSION_ID]}" "base,build"; then
+    if __lib_package_load "${__T_PKG}" "${__CONFIG[BUILD_DISTRIBUTION_ID]}" "${__CONFIG[BUILD_DISTRIBUTION_VERSION_ID]}" "base" "build"; then
         __log i -- "Package '${__T_PKG}' loaded successfully.\n"
     else
         __log e -- "Could not load package '${__T_PKG}'. Aborting.\n"

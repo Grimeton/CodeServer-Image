@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -55,12 +55,10 @@ declare -gx __ARRAY_LOADED=1
 # Returns >0 on error
 #
 function __array_add() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __array_exists "${@:1:1}"; then
+    if __array_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
@@ -92,12 +90,10 @@ function __array_add() {
 # Returns >0 only on failures
 #
 function __array_add_always() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __array_exists "${@:1:1}"; then
+    if __array_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
@@ -110,7 +106,6 @@ function __array_add_always() {
     fi
     return 1
 }
-
 #####
 #
 # - __array_contains
@@ -127,12 +122,10 @@ function __array_add_always() {
 #
 function __array_contains() {
 
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __array_exists "${@:1:1}"; then
+    if __array_exists "${@:1:1}"; then
         declare -n __P_HAYSTACK="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
@@ -145,14 +138,13 @@ function __array_contains() {
         return 111
     else
         for __P_HAY in "${__P_HAYSTACK[@]}"; do
-            if [[ "${__P_HAY}" == "${__P_NEEDLE}" ]]; then
+            if [[ "${__P_HAY}x" == "${__P_NEEDLE}x" ]]; then
                 return 0
             fi
         done
     fi
     return 1
 }
-
 #####
 #
 # - __array_empty
@@ -167,12 +159,11 @@ function __array_contains() {
 # Returns >0 otherwise
 #
 function __array_empty() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __array_exists "${@:1:1}"; then
+
+    if __array_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ ${#__P_ARRAY[@]} -lt 1 ]]; then
@@ -225,12 +216,10 @@ function __array_exists() {
 # Returns >0 on failure/value not found
 #
 function __array_remove() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __array_exists "${@:1:1}"; then
+    if __array_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
@@ -256,7 +245,7 @@ function __array_remove() {
         else
             __P_ARRAY=()
         fi
-        
+
         if [[ ${__T_DELETED} -gt 0 ]]; then
             return 0
         fi

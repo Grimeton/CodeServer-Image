@@ -191,7 +191,7 @@ EOF
 declare -grx __D_LIB_DEFAULT_HEADER
 
 # the packages library should ALWAYS load on init, no matter what.
-declare -agrx __D_LIB_PACKAGES_INIT=("base_config" "base_dummies" "base_aarray" "base_array" "base_environment" "base_log" "base_trap")
+declare -agrx __D_LIB_PACKAGES_INIT=("base_config" "base_dummies" "base_aarray" "base_array" "base_environment" "base_log" "base_trap" "base_variable")
 
 #
 # - END: Library defaults

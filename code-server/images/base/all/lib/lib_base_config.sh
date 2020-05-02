@@ -81,8 +81,9 @@ fi
 #   - #7 [OUT|OPTIONAL]: RETURN_ARRAY - Name of an array that should be filled with the found distributions
 #
 # - Return values:
-#   - 0 when distributions were found (>0)
-#   - >0 when no distributions were found or error.
+#   - 0 when distributions were found (>0).
+#   - 1 when no distributions were found.
+#   - >1 on error.
 #
 function __config_distribution_find() {
 
@@ -247,8 +248,10 @@ function __config_distribution_find() {
             echo "${__T_CONFIG_DF_RETURN_ARRAY[@]}"
         fi
         return 0
+    else
+        return 1
     fi
-    return 1
+    return 254
 
 }
 #####
@@ -280,8 +283,9 @@ function __config_distribution_find() {
 #   - #7: [OUT|OPTIONAL]: RETURN_ARRAY - A name of an existing array that should be filled with the found information
 #
 # - Return values:
-#   - 0 when valid/success.
-#   - >0 when invalid/failure.
+#   - 0 when distribution found.
+#   - 1 when no distribution found.
+#   - >1 when invalid/failure.
 #
 function __config_distribution_get() {
 
@@ -357,97 +361,14 @@ function __config_distribution_get() {
                 echo "${__T_CONFIG_DG_RETURN_ARRAY[@]}"
             fi
             return 0
-        fi
-    fi
-    return 1
-}
-#####
-#
-# - __config_distribution_verify
-#
-# - Description:
-#   Takes the parameters and checks if they're valid against
-#   __D_DISTRIBUTIONS_SUPPORTED_IDS in "lib_defaults.sh"
-#
-#   The tests for "NAME","CODENAME",COMPRESSION and COMMENT are only done
-#   if both sides hold a value, meaning that the value you handed to the function
-#   and the value that comes from the array are NOT empty.
-#
-#   CODENAME and COMPRESSION are always matched case insensitive.
-#
-# !!! PARAMETERS ARE POSITIONAL - OPTIONAL MEANS THEY CAN BE EMPTY -> ""
-#
-# - Parameters:
-#   - #1: [IN|MANDATORY]: DISTRIBUTION_ID - "ID" in /etc/os-release
-#   - #2: [IN|OPTIONAL]: DISTRIBUTION_NAME - "NAME" in /etc/os-release (can be empty)
-#   - #3: [IN|MANDATORY]: DISTRIBUTION_VERSION_ID - "VERSION_ID" in /etc/os-release
-#   - #4: [IN|OPTIONAL]: DISTRIBUTION_VERSION_CODENAME - "VERSION_CODENAME" in /etc/os-release (can be empty)
-#   - #5: [IN|OPTIONAL]: DISTRIBUTION_COMPRESSION - The compression type of the distribution (can be empty)
-#   - #6: [IN|OPTIONAL]: DISTRIBUTION_COMMENT - A comment that can be added to the definintion (can be empty)
-#
-# - Return values:
-#   - 0 when valid/success.
-#   - >0 when invalid/problems.
-#
-function __config_distribution_verify() {
-
-    if [[ "${@:1:1}x" != "x" ]]; then
-        declare __P_DISTRIBUTION_ID="${@:1:1}"
-    else
-        declare __P_DISTRIBUTION_ID=""
-    fi
-    if [[ "${@:2:1}x" != "x" ]]; then
-        declare __P_DISTRIBUTION_NAME="${@:2:1}"
-    else
-        declare __P_DISTRIBUTION_NAME=""
-    fi
-    if [[ "${@:3:1}x" != "x" ]]; then
-        declare __P_DISTRIBUTION_VERSION_ID="${@:3:1}"
-    else
-        declare __P_DISTRIBUTION_VERSION_ID=""
-    fi
-    if [[ "${@:4:1}x" != "x" ]]; then
-        declare __P_DISTRIBUTION_VERSION_CODENAME="${@:4:1}"
-    else
-        declare __P_DISTRIBUTION_VERSION_CODENAME=""
-    fi
-    if [[ "${@:5:1}x" != "x" ]]; then
-        declare __P_DISTRIBUTION_COMPRESSION="${@:5:1}"
-    else
-        declare __P_DISTRIBUTION_COMPRESSION=""
-    fi
-    if [[ "${@:6:1}x" != "x" ]]; then
-        declare __P_DISTRIBUTION_COMMENT="${@:6:1}"
-    else
-        declare __P_DISTRIBUTION_COMMENT=""
-    fi
-
-    if __array_exists "${@:7:1}"; then
-        declare -n __T_CONFIG_DV_RETURN_ARRAY="${@:7:1}"
-    else
-        declare -a __T_CONFIG_DV_DUMMY_ARRAY=()
-        declare -n __T_CONFIG_DV_RETURN_ARRAY="__T_CONFIG_DV_DUMMY_ARRAY"
-    fi
-
-    if __config_distribution_find \
-        "${__P_DISTRIBUTION_ID}" \
-        "${__P_DISTRIBUTION_NAME}" \
-        "${__P_DISTRIBUTION_VERSION_ID}" \
-        "${__P_DISTRIBUTION_VERSION_CODENAME}" \
-        "${__P_DISTRIBUTION_COMPRESSION}" \
-        "${__P_DISTRIBUTION_COMMENT}" \
-        "${!__T_CONFIG_DV_RETURN_ARRAY}"; then
-
-        if [[ ${#__T_CONFIG_DV_RETURN_ARRAY[@]} -ne 1 ]]; then
-            __T_CONFIG_DV_RETURN_ARRAY=()
+        else
             return 1
         fi
-        return 0
+    else
+        return 1
     fi
-    return 1
-
+    return 254
 }
-
 #####
 #
 # - __config_distribution_get_dockerfile()
@@ -464,7 +385,8 @@ function __config_distribution_verify() {
 #
 # - Return values:
 #   - 0 when file is found/success.
-#   - >0 when no file was found/error.
+#   - 1 when no file was found.
+#   - >1 on error.
 #
 function __config_distribution_get_dockerfile() {
 
@@ -528,6 +450,96 @@ function __config_distribution_get_dockerfile() {
             echo "${__T_LAST_FOUND_FILE}"
         fi
         return 0
+    else
+        return 1
+    fi
+    return 254
+
+}
+#####
+#
+# - __config_distribution_verify
+#
+# - Description:
+#   Takes the parameters and checks if they're valid against
+#   __D_DISTRIBUTIONS_SUPPORTED_IDS in "lib_defaults.sh"
+#
+#   The tests for "NAME","CODENAME",COMPRESSION and COMMENT are only done
+#   if both sides hold a value, meaning that the value you handed to the function
+#   and the value that comes from the array are NOT empty.
+#
+#   CODENAME and COMPRESSION are always matched case insensitive.
+#
+# !!! PARAMETERS ARE POSITIONAL - OPTIONAL MEANS THEY CAN BE EMPTY -> ""
+#
+# - Parameters:
+#   - #1: [IN|MANDATORY]: DISTRIBUTION_ID - "ID" in /etc/os-release
+#   - #2: [IN|OPTIONAL]: DISTRIBUTION_NAME - "NAME" in /etc/os-release (can be empty)
+#   - #3: [IN|MANDATORY]: DISTRIBUTION_VERSION_ID - "VERSION_ID" in /etc/os-release
+#   - #4: [IN|OPTIONAL]: DISTRIBUTION_VERSION_CODENAME - "VERSION_CODENAME" in /etc/os-release (can be empty)
+#   - #5: [IN|OPTIONAL]: DISTRIBUTION_COMPRESSION - The compression type of the distribution (can be empty)
+#   - #6: [IN|OPTIONAL]: DISTRIBUTION_COMMENT - A comment that can be added to the definintion (can be empty)
+#
+# - Return values:
+#   - 0 when verified.
+#   - 1 when not verified.
+#   - >1 when invalid/problems.
+#
+function __config_distribution_verify() {
+
+    if [[ "${@:1:1}x" != "x" ]]; then
+        declare __P_DISTRIBUTION_ID="${@:1:1}"
+    else
+        declare __P_DISTRIBUTION_ID=""
+    fi
+    if [[ "${@:2:1}x" != "x" ]]; then
+        declare __P_DISTRIBUTION_NAME="${@:2:1}"
+    else
+        declare __P_DISTRIBUTION_NAME=""
+    fi
+    if [[ "${@:3:1}x" != "x" ]]; then
+        declare __P_DISTRIBUTION_VERSION_ID="${@:3:1}"
+    else
+        declare __P_DISTRIBUTION_VERSION_ID=""
+    fi
+    if [[ "${@:4:1}x" != "x" ]]; then
+        declare __P_DISTRIBUTION_VERSION_CODENAME="${@:4:1}"
+    else
+        declare __P_DISTRIBUTION_VERSION_CODENAME=""
+    fi
+    if [[ "${@:5:1}x" != "x" ]]; then
+        declare __P_DISTRIBUTION_COMPRESSION="${@:5:1}"
+    else
+        declare __P_DISTRIBUTION_COMPRESSION=""
+    fi
+    if [[ "${@:6:1}x" != "x" ]]; then
+        declare __P_DISTRIBUTION_COMMENT="${@:6:1}"
+    else
+        declare __P_DISTRIBUTION_COMMENT=""
+    fi
+
+    if __array_exists "${@:7:1}"; then
+        declare -n __T_CONFIG_DV_RETURN_ARRAY="${@:7:1}"
+    else
+        declare -a __T_CONFIG_DV_DUMMY_ARRAY=()
+        declare -n __T_CONFIG_DV_RETURN_ARRAY="__T_CONFIG_DV_DUMMY_ARRAY"
+    fi
+
+    if __config_distribution_find \
+        "${__P_DISTRIBUTION_ID}" \
+        "${__P_DISTRIBUTION_NAME}" \
+        "${__P_DISTRIBUTION_VERSION_ID}" \
+        "${__P_DISTRIBUTION_VERSION_CODENAME}" \
+        "${__P_DISTRIBUTION_COMPRESSION}" \
+        "${__P_DISTRIBUTION_COMMENT}" \
+        "${!__T_CONFIG_DV_RETURN_ARRAY}"; then
+
+        if [[ ${#__T_CONFIG_DV_RETURN_ARRAY[@]} -ne 1 ]]; then
+            __T_CONFIG_DV_RETURN_ARRAY=()
+            return 1
+        fi
+        return 0
     fi
     return 1
+
 }

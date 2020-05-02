@@ -41,6 +41,37 @@ declare -ag __INSTALLER_PACKAGES_REPOSITORY_INSTALL=("apt-transport-https" "ca-c
 #   Takes the full path to a file and then tries to read its contents and install the download based on the information
 #   inside the file. If the file is not found - ERROR.
 #
+#   The file describing a download contains the following variables:
+#
+#   - DOWNLOAD_DESTINATION
+#       Full path to the future file that will be downloaded.
+#       E.g.: DOWNLOAD_DESTINATION="/usr/local/bin/dumb-init"
+#
+#   - DOWNLOAD_FILE_GROUP
+#       Either the name or the ID of the group this file will be owned by later.
+#       E.g.: DOWNLOAD_FILE_GROUP="root"
+#
+#   - DOWNLOAD_FILE_OWNER
+#       The future owner's name or id of the file.
+#       E.g.: DOWNLOAD_FILE_OWNER="root"
+#
+#   - DOWNLOAD_FILE_PERMISSIONS
+#       Octal representation of the future permissions of the file. Can be either 3 or 4 digits.
+#       E.g. DOWNLOAD_FILE_PERMISSIONS="0755"
+#
+#   - DOWNLOAD_IGNORE_CERTIFICATE
+#       Can be set, so that curl is not validating the certificate of the webserver where the file
+#       gets downloaded from.
+#       E.g.: DOWNLOAD_IGNORE_CERTIFICATE=1
+#
+#   - DOWNLOAD_PACKAGE_NAME
+#       Name of the package. Can be freely chosen. Has only cosmetic effects.
+#       E.g.: DOWNLOAD_PACKAGE_NAME="dumb-init"
+#
+#   - DOWNLOAD_SOURCE
+#       Full URL pointing to the file to be downloaded.
+#       E.g. DOWNLOAD_SOURCE="https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_x86_64"
+#
 # - Paramters:
 #   - #1 [IN|MANDATORY] - FILE - The full path to the file that contains the information on how/what to install.
 #
@@ -189,6 +220,38 @@ function __installer_download_install() {
     return ${__T_ERROR}
 
 }
+#####
+#
+# - __installer_repository_install
+#
+# - Description
+#   When given a full path to a repository file, loads the information and tries to install the repository
+#   information to the distribution's package manager.
+#
+#   The file describing a repository contains the following variables:
+#
+#   - REPO_LIST_ENTRIES
+#       An array holding one or more lines, that will be added to the sources.list file of this
+#       repository. One can use variables here, they're replaced.
+#       E.g: REPO_LIST_ENTRIES=( "deb https://deb.nodesource.com/node_12.x/ ${__CONFIG[BUILD_DISTRIBUTION_VERSION_CODENAME]} main" )
+#
+#   - REPO_LIST_FILENAME
+#       The filename of this sources.list file. Will be put into the package manager's configuration directory.
+#       E.g.: REPO_LIST_FILENAME="nodesource.list"
+#
+#   - REPO_KEYS
+#       An array holding one or more URLs pointing to the GPG keys of the repository that
+#       are to be installed to make the repository available.
+#       E.g.: REPO_KEYS=( 'https://deb.nodesource.com/gpgkey/nodesource.gpg.key' )
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: REPO_FILE - Full path to the repository file to be installed.
+#   - #2 [IN|OPTIONAL]: FORCE - To enforce installation even if the file has already been installed.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
 function __installer_repository_install() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
@@ -355,6 +418,21 @@ function __installer_repository_install() {
     fi
     return ${__T_ERROR}
 }
+#####
+#
+# - __installer_repository_install_key
+#
+# - Description
+#   Takes the URL to a GPG key and then tries to download/install it.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: KEY - URL pointing at a file that contains the GPG key to be installed.
+#   - #2 [IN|OPTIONAL]: CURL_IGNORE_CERTIFICATE - Curl will ignore the server certificate if set and contains a value.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
 function __installer_repository_install_key() {
 
     if [[ "${@:1:1}x" == "x" ]]; then

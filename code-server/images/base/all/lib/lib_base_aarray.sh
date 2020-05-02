@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -42,35 +42,6 @@ declare -gx __AARRAY_TYPE_REGEX='^declare -[^\ ]*A[^\ ]*\ .*$'
 
 #####
 #
-# - __aarray_exists
-#
-# Takes the name of a variable and tests if it is an associative array.
-#
-# - Parameters:
-#
-# - #1 [IN|MANDATORY]: ARRAYNAME - The name of the variable to test for
-#
-# Returns 0 when array is associative
-# Returns > 0 otherwise
-#
-function __aarray_exists() {
-
-    shopt -u nocasematch
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    else
-        declare __P_ARRAYNAME="${@:1:1}"
-    fi
-    declare __T_RESULT=""
-    if __T_RESULT="$(declare -p "${__P_ARRAYNAME}" 2>/dev/null)"; then
-        if [[ "${__T_RESULT}" =~ ${__AARRAY_TYPE_REGEX} ]]; then
-            return 0
-        fi
-    fi
-    return 1
-}
-#####
-#
 # - __aarray_add
 #
 # Takes the name of an array, the key and the value and adds it if the key does NOT exist yet.
@@ -86,16 +57,14 @@ function __aarray_exists() {
 #
 function __aarray_add() {
 
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 103
+        return 102
     else
         declare -a __P_KEY="${@:2:1}"
     fi
@@ -131,16 +100,14 @@ function __aarray_add() {
 #
 function __aarray_add_always() {
 
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 103
+        return 102
     else
         declare -a __P_KEY="${@:2:1}"
     fi
@@ -171,16 +138,14 @@ function __aarray_add_always() {
 # Returns >0 when error
 #
 function __aarray_contains_key() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 103
+        return 102
     else
         declare __P_KEY="${@:2:1}"
     fi
@@ -210,12 +175,10 @@ function __aarray_contains_key() {
 # Returns 0 on success/found
 # Returns >0 on error/not found
 function __aarray_contains_value() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
@@ -237,6 +200,60 @@ function __aarray_contains_value() {
 }
 #####
 #
+# - __aarray_empty
+#
+# Takes the name of an array and tests if it is empty.
+#
+# - Parameters
+#
+# - #1 [IN|MANDATORY]: ARRAY- The name of an array to be tested.
+#
+# Returns 0 when empty/success
+# Returns >0 when not empty/error
+#
+function __aarray_empty() {
+    if __aarray_exists "${@:1:1}"; then
+        declare -n __P_ARRAY="${@:1:1}"
+    else
+        return 101
+    fi
+
+    if [[ ${#__P_ARRAY[@]} -lt 1 ]]; then
+        return 0
+    fi
+    return 1
+}
+#####
+#
+# - __aarray_exists
+#
+# Takes the name of a variable and tests if it is an associative array.
+#
+# - Parameters:
+#
+# - #1 [IN|MANDATORY]: ARRAYNAME - The name of the variable to test for
+#
+# Returns 0 when array is associative
+# Returns > 0 otherwise
+#
+function __aarray_exists() {
+
+    shopt -u nocasematch
+    if [[ "${@:1:1}x" == "x" ]]; then
+        return 101
+    else
+        declare __P_ARRAYNAME="${@:1:1}"
+    fi
+    declare __T_RESULT=""
+    if __T_RESULT="$(declare -p "${__P_ARRAYNAME}" 2>/dev/null)"; then
+        if [[ "${__T_RESULT}" =~ ${__AARRAY_TYPE_REGEX} ]]; then
+            return 0
+        fi
+    fi
+    return 1
+}
+#####
+#
 # - __aaray_get_key
 #
 # Takes the name of an array and the value to search for and returns the keys (!) that match the value.
@@ -251,27 +268,24 @@ function __aarray_contains_value() {
 # Returns >0 on failure.
 #
 function __aarray_get_key() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 103
+        return 102
     else
         declare __P_VALUE="${@:2:1}"
     fi
 
-    if [[ "${@:3:1}x" == "x" ]]; then
-        declare -a __T_RETURN_ARRAY=()
-    elif __array_exists "${@:3:1}"; then
+    if __array_exists "${@:3:1}"; then
         declare -n __T_RETURN_ARRAY="${@:3:1}"
     else
         declare -a __T_RETURN_ARRAY=()
     fi
+
     if [[ ${#__P_ARRAY[@]} -lt 1 ]]; then
         return 111
     else
@@ -307,16 +321,14 @@ function __aarray_get_key() {
 # Returns >0 when not found/problem
 #
 function __aarray_get_value() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 103
+        return 102
     else
         declare __P_KEY="${@:2:1}"
     fi
@@ -347,33 +359,6 @@ function __aarray_get_value() {
 }
 #####
 #
-# - __aarray_empty
-#
-# Takes the name of an array and tests if it is empty.
-#
-# - Parameters
-#
-# - #1 [IN|MANDATORY]: ARRAY- The name of an array to be tested.
-#
-# Returns 0 when empty/success
-# Returns >0 when not empty/error
-#
-function __aarray_empty() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
-        declare -n __P_ARRAY="${@:1:1}"
-    else
-        return 102
-    fi
-
-    if [[ ${#__P_ARRAY[@]} -lt 1 ]]; then
-        return 0
-    fi
-    return 1
-}
-#####
-#
 # - __aarray_remove_key
 #
 # Takes the name of an array and a key and removes it if found.
@@ -389,34 +374,23 @@ function __aarray_empty() {
 # Returns >0 on error/failure
 #
 function __aarray_remove_key() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 103
+        return 102
     else
         declare __P_KEY="${@:2:1}"
     fi
 
-    if [[ "${@:3:1}x" == "x" ]]; then
-        declare __T_RETURN_RESULT=""
-    elif __variable_exists "${@:3:1}"; then
-        declare -n __T_RETURN_RESULT="${@:3:1}"
-    else
-        declare __T_RETURN_RESULT=""
-    fi
-
     if __aarray_empty "${!__P_ARRAY}"; then
-        return 111;
+        return 111
     fi
 
     if __aarray_contains_key "${!__P_ARRAY}" "${__P_KEY}"; then
-        __T_RETURN_RESULT="${__P_ARRAY[${__P_KEY}]}"
         if unset __P_ARRAY[${__P_KEY}]; then
             return 0
         else
@@ -444,12 +418,10 @@ function __aarray_remove_key() {
 # Returns >0 when failure/no removal
 #
 function __aarray_remove_value() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    elif __aarray_exists "${@:1:1}"; then
+    if __aarray_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
-        return 102
+        return 101
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then

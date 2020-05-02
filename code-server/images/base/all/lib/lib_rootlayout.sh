@@ -166,7 +166,7 @@ function __rootlayout_init() {
 #
 # - Return values:
 #   - 0 on success.
-#   - 1 on failure.
+#   - >0 on failure.
 #
 function __rootlayout_copyto() {
     if [[ "${@:1:1}x" == "x" ]]; then
@@ -669,6 +669,22 @@ function __rootlayout_copy_stages() {
         esac
     done
 }
+#####
+#
+# - __rootlayout_copy_systemroot
+#
+# - Description
+#   Takes the distribution id and version id and then scans all the stages for files to be copied to the new system root.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: DISTRIBUTION_ID - The distribution's ID from /etc/os-release.
+#   - #2 [IN|MANDATORY]: DISTRIBUTION_VERSION_ID - The distribution's VERSION_ID from /etc/os-release.
+#   - #3+ [IN|MANDATORY]: STAGE_NAME - One ore more names of stages that should be searched for files.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
 function __rootlayout_copy_systemroot() {
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
@@ -895,7 +911,6 @@ function __rootlayout_copy_staging_directory() {
     fi
 
 }
-
 #####
 #
 # - __rootlayout_destroy

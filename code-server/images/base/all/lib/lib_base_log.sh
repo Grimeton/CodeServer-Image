@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -97,7 +97,6 @@ for __T_LOG_COLOUR in "${__LOG_IMPORT_TERMINAL_COLOURS[@]}"; do
     fi
 done
 unset __LOG_IMPORT_TERMINAL_COLOURS
-
 #####
 #
 # - __log()
@@ -185,6 +184,250 @@ function __log() {
         return 254
         ;;
     esac
+}
+#####
+#
+# - __log_banner
+#
+# - Description
+#   Wrapper around __log_banner_start, __log_banner_content, __log_banner_end to create a banner
+#   with a single line.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY] LOGLEVEL - One of the log levels described at "__log".
+#   - #2 [IN|MANDATORY] INDENT - Indentation level as described at "__log".
+#   - #3 [IN|MANDATORY] MESSAGE - The message to be logged.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure/problems.
+#
+function __log_banner() {
+    __log_banner_start "${@:1:1}" "${@:2:1}"
+    __log_banner_content "${@:1:1}" "${@:2:1}" "" "" "${@:3}"
+    __log_banner_end "${@:1:1}" "${@:2:1}"
+}
+#####
+#
+# - __log_banner_content
+#
+# - Description
+#   Takes a bunch of parameters and a log message and logs the message as part of a banner to screen.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: LOGLEVEL - A log level as described at "__log".
+#   - #2 [IN|OPTIONAL]: INDENT - An indentation as described at "__log".
+#   - #3 [IN|OPTIONAL]: PREFIX - The character shown at the beginning of the line. Default is "*".
+#   - #4 [IN|OPTIONAL]: SUFFIX - The character show at the end of the line. Default is "*".
+#   - #5 [IN|OPTIONAL]: LOG_MESSAGE - The message to be logged.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on error.
+#
+function __log_banner_content() {
+
+    if [[ "${@:1:1}x" == "x" ]]; then
+        return 101
+    else
+        declare __P_C_LOG_LEVEL="${@:1:1}"
+    fi
+
+    if [[ "${@:2:1}x" == "x" ]]; then
+        declare __P_C_LOG_INDENT=""
+    else
+        declare __P_C_LOG_INDENT="${@:2:1}"
+    fi
+
+    if [[ "${@:3:1}x" != "x" ]]; then
+        declare __P_C_PREFIX="${@:3:1}"
+    else
+        declare __P_C_PREFIX="${__LOG_BANNER_PREFIX}"
+    fi
+
+    if [[ "${@:4:1}x" != "x" ]]; then
+        declare __P_C_SUFFIX="${@:4:1}"
+    else
+        declare __P_C_SUFFIX="${__LOG_BANNER_SUFFIX}"
+    fi
+
+    if [[ "${@:5}x" == "x" ]]; then
+        declare __P_C_LOG_MESSAGE=""
+    else
+        declare __P_C_LOG_MESSAGE="${@:5}"
+    fi
+
+    if [[ -n ${COLUMNS+x} ]]; then
+        if [[ "${COLUMNS}" =~ ${__LOG_TEXT_REGEX_NUMBER} ]]; then
+            declare -i __T_C_MAX_WIDTH=${COLUMNS}
+        else
+            declare -i __T_C_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
+        fi
+    else
+        declare -i __T_C_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
+    fi
+
+    declare __T_C_INDENT=""
+    while [[ ${#__T_C_INDENT} -lt ${#__P_C_LOG_INDENT} ]]; do
+        __T_C_INDENT+=" "
+    done
+
+    declare __T_C_CONTENT="${__P_C_LOG_MESSAGE}"
+    declare __T_C_PREFIX="${__P_C_PREFIX}"
+    declare __T_C_SUFFIX="${__P_C_SUFFIX}"
+    # PREFIX - SPACE - [CONTENT] - SPACE - SUFFIX
+    declare -i __T_C_CONTENT_SIZE_MAX=$((${__T_C_MAX_WIDTH} - ${#__T_C_INDENT} - ${#__T_C_PREFIX} - 1 - 1 - ${#__T_C_SUFFIX}))
+    declare __T_C_LAST_SPACE=""
+    declare __T_C_T_LAST_SPACE=""
+    declare __T_C_C_MSG=""
+    declare __T_C_W_MSG="${__P_C_LOG_MESSAGE}"
+    # echo "_T_C_W_MSG: ${#__T_C_W_MSG}"
+    while [[ ${#__T_C_W_MSG} -gt 0 ]]; do
+        __T_C_C_MSG="${__T_C_W_MSG:0:${__T_C_CONTENT_SIZE_MAX}}"
+        if [[ ${#__T_C_C_MSG} == ${#__T_C_W_MSG} ]]; then
+            __T_C_W_MSG=""
+        elif [[ ${#__T_C_C_MSG} -le ${__T_C_CONTENT_SIZE_MAX} ]]; then
+            __T_C_W_MSG=""
+        else
+            if [[ "${__T_C_C_MSG: -1}x" == " x" ]] || [[ "${__T_C_W_MSG:${#__T_C_C_MSG}:1}x" == " x" ]]; then
+                __T_C_W_MSG="${__T_C_W_MSG:${#__T_C_C_MSG}}"
+            else
+                # this is a workaround so that bash is not erroring out
+                __T_C_T_LAST_SPACE="${__T_C_C_MSG##* }"
+                __T_C_LAST_SPACE=$((${#__T_C_C_MSG} - ${#__T_C_T_LAST_SPACE}))
+                if [[ ${#__T_C_C_MSG} -eq ${#__T_C_LAST_SPACE} ]]; then
+                    __T_C_W_MSG="${__T_C_W_MSG:${#__T_C_C_MSG}}"
+                else
+                    __T_C_C_MSG="${__T_C_C_MSG:0:${__T_C_LAST_SPACE}}"
+                    __T_C_W_MSG="${__T_C_W_MSG:${#__T_C_C_MSG}}"
+                fi
+            fi
+        fi
+        while [[ ${#__T_C_C_MSG} -lt ${__T_C_CONTENT_SIZE_MAX} ]]; do
+            __T_C_C_MSG+=" "
+        done
+        __log "${__P_C_LOG_LEVEL}" "${__P_C_LOG_INDENT}" "${__T_C_PREFIX} ${__T_C_C_MSG} ${__T_C_SUFFIX}\n"
+        # echo "__T_C_W_MSG: '${__T_C_W_MSG}' LENGTH: '${#__T_C_W_MSG}'."
+    done
+}
+#####
+#
+# - __log_banner_end
+#
+# - Description
+#   Simple wrapper around __log_banner_outer to create the footer of the banner. If you want the full
+#   blown possibilities, you have to use __log_banner_outer directly.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY] - LOGLEVEL - One of the log levels described at "__log".
+#   - #2 [IN|OPTIONAL] - INDENT - The indentation level as described at "__log"
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
+function __log_banner_end() {
+    __log_banner_outer "${@:1:1}" "${@:2:1}"
+}
+#####
+#
+# - __log_banner_outer
+#
+# - Description
+#   Used to create the header or footer of a banner.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY] - LOGLEVEL - One of the log levels described at "__log".
+#   - #2 [IN|OPTIONAL] - INDENT - The indentation level as described at "__log"
+#   - #3 [IN|OPTIONAL] - PREFIX - The character that is shown at the left of the printed line. Default is "*".
+#   - #4 [IN|OPTIONAL] - CONTENT - The character(s) that is/are used to create the printed line. Default is "*".
+#   - #5 [IN|OPTIONAL] - SUFFIX - The character that is show at the right of the printed line. Default is "*".
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
+function __log_banner_outer() {
+
+    if [[ "${@:1:1}x" == "x" ]]; then
+        return 101
+    else
+        declare __P_B_LOG_LEVEL="${@:1:1}"
+    fi
+
+    if [[ "${@:2:1}x" == "x" ]]; then
+        declare __P_B_LOG_INDENT=""
+    else
+        declare __P_B_LOG_INDENT="${@:2:1}"
+    fi
+
+    if [[ "${@:3:1}x" != "x" ]]; then
+        declare __P_B_PREFIX="${@:3:1}"
+    else
+        declare __P_B_PREFIX="${__LOG_BANNER_PREFIX}"
+    fi
+
+    if [[ "${@:4:1}x" != "x" ]]; then
+        declare __P_B_CONTENT="${@:4:1}"
+    else
+        declare __P_B_CONTENT="${__LOG_BANNER_CONTENT}"
+    fi
+
+    if [[ "${@:5:1}x" != "x" ]]; then
+        declare __P_B_SUFFIX="${@:5:1}"
+    else
+        declare __P_B_SUFFIX="${__LOG_BANNER_SUFFIX}"
+    fi
+
+    if [[ -n ${COLUMNS+x} ]]; then
+        if [[ "${COLUMNS}" =~ ${__LOG_TEXT_REGEX_NUMBER} ]]; then
+            declare -i __T_BB_MAX_WIDTH=${COLUMNS}
+        else
+            declare -i __T_BB_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
+        fi
+    else
+        declare -i __T_BB_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
+    fi
+
+    declare __T_BB_INDENT=""
+    while [[ ${#__T_BB_INDENT} -lt ${#__P_B_LOG_INDENT} ]]; do
+        __T_BB_INDENT+=" "
+    done
+    declare __T_BB_CONTENT="${__P_B_CONTENT}"
+    declare __T_BB_PREFIX="${__P_B_PREFIX}"
+    declare __T_BB_SUFFIX="${__P_B_SUFFIX}"
+    declare -i __T_BB_CONTENT_MAX_LENGTH="$((${__T_BB_MAX_WIDTH} - ${#__T_BB_INDENT} - ${#__T_BB_PREFIX} - ${#__T_BB_SUFFIX}))"
+    declare -i __T_BB_CONTENT_MAX_LENGTH_ZERO="$((${__T_BB_CONTENT_MAX_LENGTH} - 1))"
+
+    # in perl: $_T_BANNER_CONTENT="$_T_D_BANNER_BORDER_CONTENT"x"$_T_D_BANNER_CONTENT_LENGTH";
+    # in bash:
+    while [[ ${#__T_BB_CONTENT} -lt ${__T_BB_CONTENT_MAX_LENGTH} ]]; do
+        __T_BB_CONTENT+="${__P_B_CONTENT}"
+    done
+
+    if [[ ${#__T_BB_CONTENT} -gt ${__T_BB_CONTENT_MAX_LENGTH} ]]; then
+        __T_BB_CONTENT="${__T_BB_CONTENT:0:${__T_BB_CONTENT_MAX_LENGTH_ZERO}}"
+    fi
+    __log "${__P_B_LOG_LEVEL}" "${__P_B_LOG_INDENT}" "${__T_BB_PREFIX}${__T_BB_CONTENT}${__T_BB_SUFFIX}\n"
+}
+#####
+#
+# - __log_banner_start
+#
+# - Description
+#   Simple wrapper around __log_banner_outer to create the header of the banner. If you want the
+#   full blown possibilities, you have to use __log_banner_outer directly.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY] - LOGLEVEL - One of the log levels described at "__log".
+#   - #2 [IN|OPTIONAL] - INDENT - The indentation level as described at "__log"
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
+function __log_banner_start() {
+    __log_banner_outer "${@:1:1}" "${@:2:1}"
 }
 #####
 #
@@ -434,6 +677,47 @@ function __log_info() {
 }
 #####
 #
+# - __log_stdin
+#
+# - Description
+#   Function that reads from stdin and prints it to the log level it got handed when called.
+#
+# - Example
+#   Let's say you run tar and want it's output only to be visible when debug is enabled.
+#
+#   # tar cvf /some/file /some/directory  2>&1 | __log_stdin d --
+#
+#   Tar will create a tarball and print its information to stderr. By redirecting stderr to stdout and then
+#   piping it to the function, the information will only be printed/shown on the screen/in log files, if debugging is enabled.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: LOG_LEVEL - On of the log levels described at "__log".
+#   - #2 [IN|OPTIONAL]: LOG_INDENT - An indentation level as described at "__log".
+#
+# - Return values
+#   - 0 on succcess.
+#   - >0 on error.
+#
+function __log_stdin() {
+    if [[ "${@:1:1}x" == "x" ]]; then
+        return 101
+    else
+        declare __P_LOG_LEVEL="${@:1:1}"
+    fi
+
+    if [[ "${@:2:1}x" == "x" ]]; then
+        declare __P_LOG_INDENT=""
+    else
+        declare __P_LOG_INDENT="${@:2:1}"
+    fi
+
+    while IFS= read line; do
+        __log "${__P_LOG_LEVEL}" "${__P_LOG_INDENT}" "${line}\n"
+    done
+
+}
+#####
+#
 # - __log_variable
 #
 # - Takes the parameters below, and prints debug output of the variable to wherever you think that should go
@@ -671,181 +955,4 @@ function __log__print() {
 #
 function __log__write() {
     return 0
-}
-function __log_banner() {
-    __log_banner_start "${@:1:1}" "${@:2:1}"
-    __log_banner_content "${@:1:1}" "${@:2:1}" "" "" "${@:3}"
-    __log_banner_end "${@:1:1}" "${@:2:1}"
-}
-function __log_banner_start() {
-    __log_banner_outer "${@:1:1}" "${@:2:1}"
-}
-function __log_banner_end() {
-    __log_banner_outer "${@:1:1}" "${@:2:1}"
-}
-function __log_banner_outer() {
-
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    else
-        declare __P_B_LOG_LEVEL="${@:1:1}"
-    fi
-
-    if [[ "${@:2:1}x" == "x" ]]; then
-        declare __P_B_LOG_INDENT=""
-    else
-        declare __P_B_LOG_INDENT="${@:2:1}"
-    fi
-
-    if [[ "${@:3:1}x" != "x" ]]; then
-        declare __P_B_PREFIX="${@:3:1}"
-    else
-        declare __P_B_PREFIX="${__LOG_BANNER_PREFIX}"
-    fi
-
-    if [[ "${@:4:1}x" != "x" ]]; then
-        declare __P_B_CONTENT="${@:4:1}"
-    else
-        declare __P_B_CONTENT="${__LOG_BANNER_CONTENT}"
-    fi
-
-    if [[ "${@:5:1}x" != "x" ]]; then
-        declare __P_B_SUFFIX="${@:5:1}"
-    else
-        declare __P_B_SUFFIX="${__LOG_BANNER_SUFFIX}"
-    fi
-
-    if [[ -n ${COLUMNS+x} ]]; then
-        if [[ "${COLUMNS}" =~ ${__LOG_TEXT_REGEX_NUMBER} ]]; then
-            declare -i __T_BB_MAX_WIDTH=${COLUMNS}
-        else
-            declare -i __T_BB_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
-        fi
-    else
-        declare -i __T_BB_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
-    fi
-
-    declare __T_BB_INDENT=""
-    while [[ ${#__T_BB_INDENT} -lt ${#__P_B_LOG_INDENT} ]]; do
-        __T_BB_INDENT+=" "
-    done
-    declare __T_BB_CONTENT="${__P_B_CONTENT}"
-    declare __T_BB_PREFIX="${__P_B_PREFIX}"
-    declare __T_BB_SUFFIX="${__P_B_SUFFIX}"
-    declare -i __T_BB_CONTENT_MAX_LENGTH="$((${__T_BB_MAX_WIDTH} - ${#__T_BB_INDENT} - ${#__T_BB_PREFIX} - ${#__T_BB_SUFFIX}))"
-    declare -i __T_BB_CONTENT_MAX_LENGTH_ZERO="$((${__T_BB_CONTENT_MAX_LENGTH} - 1))"
-
-    # in perl: $_T_BANNER_CONTENT="$_T_D_BANNER_BORDER_CONTENT"x"$_T_D_BANNER_CONTENT_LENGTH";
-    # in bash:
-    while [[ ${#__T_BB_CONTENT} -lt ${__T_BB_CONTENT_MAX_LENGTH} ]]; do
-        __T_BB_CONTENT+="${__P_B_CONTENT}"
-    done
-
-    if [[ ${#__T_BB_CONTENT} -gt ${__T_BB_CONTENT_MAX_LENGTH} ]]; then
-        __T_BB_CONTENT="${__T_BB_CONTENT:0:${__T_BB_CONTENT_MAX_LENGTH_ZERO}}"
-    fi
-    __log "${__P_B_LOG_LEVEL}" "${__P_B_LOG_INDENT}" "${__T_BB_PREFIX}${__T_BB_CONTENT}${__T_BB_SUFFIX}\n"
-}
-function __log_banner_content() {
-
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    else
-        declare __P_C_LOG_LEVEL="${@:1:1}"
-    fi
-
-    if [[ "${@:2:1}x" == "x" ]]; then
-        declare __P_C_LOG_INDENT=""
-    else
-        declare __P_C_LOG_INDENT="${@:2:1}"
-    fi
-
-    if [[ "${@:3:1}x" != "x" ]]; then
-        declare __P_C_PREFIX="${@:3:1}"
-    else
-        declare __P_C_PREFIX="${__LOG_BANNER_PREFIX}"
-    fi
-
-    if [[ "${@:4:1}x" != "x" ]]; then
-        declare __P_C_SUFFIX="${@:4:1}"
-    else
-        declare __P_C_SUFFIX="${__LOG_BANNER_SUFFIX}"
-    fi
-
-    if [[ "${@:5}x" == "x" ]]; then
-        declare __P_C_LOG_MESSAGE=""
-    else
-        declare __P_C_LOG_MESSAGE="${@:5}"
-    fi
-
-    if [[ -n ${COLUMNS+x} ]]; then
-        if [[ "${COLUMNS}" =~ ${__LOG_TEXT_REGEX_NUMBER} ]]; then
-            declare -i __T_C_MAX_WIDTH=${COLUMNS}
-        else
-            declare -i __T_C_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
-        fi
-    else
-        declare -i __T_C_MAX_WIDTH=${__LOG_BANNER_WIDTH_MAX}
-    fi
-
-    declare __T_C_INDENT=""
-    while [[ ${#__T_C_INDENT} -lt ${#__P_C_LOG_INDENT} ]]; do
-        __T_C_INDENT+=" "
-    done
-
-    declare __T_C_CONTENT="${__P_C_LOG_MESSAGE}"
-    declare __T_C_PREFIX="${__P_C_PREFIX}"
-    declare __T_C_SUFFIX="${__P_C_SUFFIX}"
-    # PREFIX - SPACE - [CONTENT] - SPACE - SUFFIX
-    declare -i __T_C_CONTENT_SIZE_MAX=$((${__T_C_MAX_WIDTH} - ${#__T_C_INDENT} - ${#__T_C_PREFIX} - 1 - 1 - ${#__T_C_SUFFIX}))
-    declare __T_C_LAST_SPACE=""
-    declare __T_C_T_LAST_SPACE=""
-    declare __T_C_C_MSG=""
-    declare __T_C_W_MSG="${__P_C_LOG_MESSAGE}"
-    # echo "_T_C_W_MSG: ${#__T_C_W_MSG}"
-    while [[ ${#__T_C_W_MSG} -gt 0 ]]; do
-        __T_C_C_MSG="${__T_C_W_MSG:0:${__T_C_CONTENT_SIZE_MAX}}"
-        if [[ ${#__T_C_C_MSG} == ${#__T_C_W_MSG} ]]; then
-            __T_C_W_MSG=""
-        elif [[ ${#__T_C_C_MSG} -le ${__T_C_CONTENT_SIZE_MAX} ]]; then
-            __T_C_W_MSG=""
-        else
-            if [[ "${__T_C_C_MSG: -1}x" == " x" ]] || [[ "${__T_C_W_MSG:${#__T_C_C_MSG}:1}x" == " x" ]]; then
-                __T_C_W_MSG="${__T_C_W_MSG:${#__T_C_C_MSG}}"
-            else
-                # this is a workaround so that bash is not erroring out
-                __T_C_T_LAST_SPACE="${__T_C_C_MSG##* }"
-                __T_C_LAST_SPACE=$((${#__T_C_C_MSG} - ${#__T_C_T_LAST_SPACE}))
-                if [[ ${#__T_C_C_MSG} -eq ${#__T_C_LAST_SPACE} ]]; then
-                    __T_C_W_MSG="${__T_C_W_MSG:${#__T_C_C_MSG}}"
-                else
-                    __T_C_C_MSG="${__T_C_C_MSG:0:${__T_C_LAST_SPACE}}"
-                    __T_C_W_MSG="${__T_C_W_MSG:${#__T_C_C_MSG}}"
-                fi
-            fi
-        fi
-        while [[ ${#__T_C_C_MSG} -lt ${__T_C_CONTENT_SIZE_MAX} ]]; do
-            __T_C_C_MSG+=" "
-        done
-        __log "${__P_C_LOG_LEVEL}" "${__P_C_LOG_INDENT}" "${__T_C_PREFIX} ${__T_C_C_MSG} ${__T_C_SUFFIX}\n"
-        # echo "__T_C_W_MSG: '${__T_C_W_MSG}' LENGTH: '${#__T_C_W_MSG}'."
-    done
-}
-function __log_stdin() {
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 101
-    else
-        declare __P_LOG_LEVEL="${@:1:1}"
-    fi
-
-    if [[ "${@:2:1}x" == "x" ]]; then
-        return 102
-    else
-        declare __P_LOG_INDENT="${@:2:1}"
-    fi
-
-    while IFS= read line; do
-        __log "${__P_LOG_LEVEL}" "${__P_LOG_INDENT}" "${line}\n"
-    done
-
 }

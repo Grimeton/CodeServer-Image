@@ -33,6 +33,13 @@ if ! (return 0 2>/dev/null); then
 fi
 
 set -o nounset
+declare -gx __LIB_LOADED=1
+declare -Agx __LIB_PACKAGES_LOADED=()
+declare -agx __LIB_PACKAGES_INIT=()
+
+if [[ -n ${__D_LIB_PACKAGES_INIT[@]:+x} ]]; then
+    __LIB_PACKAGES_INIT=("${__D_LIB_PACKAGES_INIT[@]}")
+fi
 
 ###
 #
@@ -43,21 +50,27 @@ set -o nounset
 #
 # - __lib_file_get_full_path
 #
-# Takes a library name and returns the full filename including
-# the path to it.
+# - Description
+#   Takes a library name and returns the full filename including
+#   the path to it.
 #
-# When the library is in "install" or "init" mode, there is only
-# one file to be returned. In "build" mode however the
-# most significant file gets returned.
+#   When the library is in "install" or "init" mode, there is only
+#   one file to be returned. In "build" mode however the
+#   most significant file gets returned.
 #
 # - Parameters:
-# - #1: Name of the library
+#   - #1 [IN|MANDATORY]: NAME - Name of the library to be searched for.
+#   - #2 [OUT|OPTIONAL]: RETURN_VALUE - Name of an existing variable that should be filled with the information.
 #
-# All other parameters are only needed during build stage:
+#   The following parameters are only needed then the library is in build mode.
 #
-# - #2: Distribution ID
-# - #3: Distribution version ID
-# - #4: The stages in IFS form, separated by a comma ","
+#   - #3 [IN|MANDATORY]: DISTRIBUTION_ID - ID from /etc/os-release.
+#   - #4 [IN|MANDATORY]: DISTRIBUTION_VERSION_ID - VERSION_ID from /etc/os-release.
+#   - #5+ [IN|MANDATORY]: STAGE - One or more image stages to be searched for the library.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
 #
 function __lib_file_get_full_path() {
 
@@ -132,21 +145,26 @@ function __lib_file_get_full_path() {
     echo "WHERE THE FUCK I AM?" >&2
     return 99
 }
-
 #####
 #
 # - __lib_file_get_all()
 #
-# Searches through all combinations of distribution/version/stage
-# and returns the files found for the filename it gets handed.
+# - Description
+#   Searches through all combinations of distribution/version/stage and returns the files
+#   found for the filename it gets handed.
 #
 # - Paramters:
-# - #1: Filename to search for
-# - #2: The distribution id to use
-# - #3: the distribution version id to use
-# - #4: the stages to search separated by a comma (",")
-# - #5: Nameref to an array - if this is filled the files won't be printed
-#       to stdout.
+#   - #1 [IN|MANDATORY]: FILENAME - Filename to search for
+#   - #2 [IN|MANDATORY]: DISTRIBUTION_ID - ID from /etc/os-release.
+#   - #3 [IN|MANDATORY]: DISTRIBUTION_VERSION_ID - VERSION_ID from /etc/os-release.
+#   - #4 [OUT|OPTIONAL]: RETURN_ARRAY - Name of an existing, empty array that should be filled with the results.
+#   - #5+ [IN|MANDATORY]:  STAGENAME - One or more names of stages to be searched in.
+#
+# - Return values
+#   - 0 on success
+#   - 1 on failure
+#   - >1 on error.
+#
 function __lib_file_get_all() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
@@ -165,9 +183,7 @@ function __lib_file_get_all() {
     else
         declare __P_DISTRIBUTION_VERSION_ID="${@:3:1}"
     fi
-    if [[ "${@:4:1}x" == "x" ]]; then
-        declare -a __T_RETURN_ARRAY=()
-    elif __array_exists "${@:4:1}"; then
+    if __array_exists "${@:4:1}"; then
         declare -n __T_RETURN_ARRAY="${@:4:1}"
     else
         declare -a __T_RETURN_ARRAY=()
@@ -178,6 +194,7 @@ function __lib_file_get_all() {
     else
         declare __P_STAGES=("${@:5}")
     fi
+
     declare -a __T_TEST_DIRECTORIES=()
 
     for __T_STAGE in "${__P_STAGES[@]}"; do
@@ -208,24 +225,31 @@ function __lib_file_get_all() {
             echo "${__T_RETURN_ARRAY[@]}"
         fi
         return 0
+    else
+        return 1
     fi
-    return 1
+    return 254
 }
 
 #####
 #
 # - __lib_file_get_most_significant
 #
-# Takes a filename and returns only the most significant file
-# that has been found for this distribution/version/build stage
-# combination
+# - Description
+#   Takes a filename and returns only the most significant file that has been found
+#   for this distribution/version/build stage combination.
 #
 # - Paramters:
-# - #1: Filename to search for
-# - #2: The distribution id to use
-# - #3: the distribution version id to use
-# - #4: the stages to search separated by a comma (",")
+#   - #1: [IN|MANDATORY]: FILENAME - Filename to search for.
+#   - #2: [IN|MANDATORY]: DISTRIBUTION_ID - ID from /etc/os-release.
+#   - #3: [IN|MANDATORY]: DISTRIBUTION_VERSION_ID - VERSION_ID from /etc/os-release.
+#   - #4: [OUT|OPTIONAL]: RETURN_VALUE - Name of an existing, empty variable.
+#   - #5+ [IN|MANDATORY]: STAGE_NAME - One ore more names of stages to be searched for the file.
 #
+# - Return values
+#   - 0 when file is found.
+#   - 1 when no file is found.
+#   - >1 on error.
 #
 function __lib_file_get_most_significant() {
 
@@ -244,14 +268,14 @@ function __lib_file_get_most_significant() {
     else
         declare __P_DISTRIBUTION_VERSION_ID="${@:3:1}"
     fi
-    if [[ "${@:4:1}x" == "x" ]]; then
-        declare __T_RET_VAL=""
-    elif __variable_exists "${@:4:1}"; then
-        declare -n __T_RET_VAL="${@:4:1}"
+    if __variable_exists "${@:4:1}"; then
+        declare -n __T_RETURN_VALUE="${@:4:1}"
     else
-        declare __T_RET_VAL=""
+        declare __T_RETURN_VALUE=""
     fi
-    __T_RET_VAL=""
+
+    __T_RETURN_VALUE=""
+
     if [[ "${@:5}x" == "x" ]]; then
         return 104
     else
@@ -263,24 +287,36 @@ function __lib_file_get_most_significant() {
 
     if __lib_file_get_all "${__P_FILENAME}" "${__P_DISTRIBUTION_ID}" "${__P_DISTRIBUTION_VERSION_ID}" "__T_GFMS_FILES_RETURN" "${__P_STAGES[@]}"; then
         __T_FILES_MAX=$((${#__T_GFMS_FILES_RETURN[@]} - 1))
-        __T_RET_VAL="${__T_GFMS_FILES_RETURN[${__T_FILES_MAX}]}"
-        if [[ ! -R __T_RET_VAL ]]; then
-            echo "${__T_RET_VAL}"
+        __T_RETURN_VALUE="${__T_GFMS_FILES_RETURN[${__T_FILES_MAX}]}"
+        if [[ ! -R __T_RETURN_VALUE ]]; then
+            echo "${__T_RETURN_VALUE}"
         fi
         return 0
+    else
+        return 1
     fi
-    return 1
+    return 254
 }
 
 #####
 #
 # - __lib_filename_from_libname
 #
-# Takes the name of a library and returns the filename.
-# No paths in play here.
+# - Description
+#   Takes the name of a library and returns the corresponding filename.
+#   This function exists mainly as the single point of configuration for
+#   the filenames of the library, in case it ever needs to be changed.
+#
+#   Works withe filenames only, no paths involved.
 #
 # - Paramters:
-# - #1: Library name
+#   - #1: [IN|MANDATORY]: LIBRARY_NAME - The name of the library...
+#   - #2: [OUT|OPTIONAL]: RETURN_VALUE - The name of an existing variable to be filled with the result.
+#
+# - Return value
+#   - 0 on success.
+#   - 1 on failure.
+#   - >1 on error.
 #
 function __lib_filename_from_libname() {
 
@@ -290,9 +326,7 @@ function __lib_filename_from_libname() {
         declare __P_LIBNAME="${@:1:1}"
     fi
 
-    if [[ "${@:2:1}x" == "x" ]]; then
-        declare __T_RETURN_VALUE=""
-    elif declare -p "${@:2:1}" >/dev/null 2>&1; then
+    if declare -p "${@:2:1}" >/dev/null 2>&1; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
     else
         declare __T_RETURN_VALUE=""
@@ -310,15 +344,19 @@ function __lib_filename_from_libname() {
 #
 # - __lib_init
 #
-# This is where the fun begins. Initialization of the library
+# - Description
+#   This is where the fun begins. Main function to initialize the library.
+#   SHOULD NOT BE USED DIRECTLY. USE __lib_init_defaults !
 #
-# Note to self:
-# DO NOT USE ANY OTHER FUNCTION FROM OTHER BASE LIBRARIES HERE. THEY ARE NOT LOADED YET
+# - Parameters:
+#   - NONE
+#
+# - Return values
+#   - 0 on success
+#   - >0 on failure.
 #
 function __lib_init() {
 
-    unset __LIB_PACKAGES_LOADED
-    declare -Agx __LIB_PACKAGES_LOADED=()
     declare __T_LIB_DIRECTORY="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
     declare __T_LIB_REGEX_IMAGES_BASE='^.*/images/base/all/lib'
 
@@ -401,52 +439,60 @@ function __lib_init() {
 #
 # - __lib_init_defaults
 #
-# This function loads the defaults. If it detects
-# That the library hasn't been loaded, it will load the library
-# first. So you can call this directly without
-# __lib_init first.
+# - Description
+#   This function will load the library via __lib_init if necessary and then load the defaults
+#   as well as set the OS information to the environment.
+#
+# - Parameters
+#   - NONE
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
 #
 function __lib_init_defaults() {
 
     if declare -p G_LIB_LOADED >/dev/null 2>&1 && ([[ "${G_LIB_LOADED,,}" == "true" ]] || [[ "${G_LIB_LOADED}" == "1" ]]); then
         echo "LIBRARY ALREADY LOADED: G_LIB_LOADED: '${G_LIB_LOADED}'."
         exit 254
+    elif __lib_init; then
+        true
     else
-        if __lib_init; then
-            true
-        else
-            echo "COULD NOT LOAD THE LIBRARY ($?). EXITING."
-            return 254
-        fi
-    fi
-    if [[ -f "${G_LIB_DIR%%/}/lib_defaults.sh" ]]; then
-        if ! source "${G_LIB_DIR%%/}/lib_defaults.sh"; then
-            echo "COULD NOT LOAD DEFAULTS. EXITING."
-            return 1
-        fi
-    else
-        return 4
-    fi
-    if ! __lib_init_os_information; then
-        echo "DON'T KNOW WHICH OS I'M ON. EXITING."
+        echo "COULD NOT LOAD THE LIBRARY ($?). EXITING."
         return 254
     fi
 
-    if declare -p __D_LIB_PACKAGES_INIT >/dev/null 2>&1; then
-        declare -agx __LIB_PACKAGES_INIT=("${__D_LIB_PACKAGES_INIT[@]}")
+    if [[ -f "${G_LIB_DIR%%/}/lib_defaults.sh" ]]; then
+        if source "${G_LIB_DIR%%/}/lib_defaults.sh"; then
+            true
+        else
+            echo "COULD NOT LOAD DEFAULTS ($?). EXITING."
+            return 253
+        fi
     else
-        declare -agx __LIB_PACKAGES_INIT=()
+        return 102
+    fi
+    if ! __lib_init_os_information; then
+        echo "DON'T KNOW WHICH OS I'M ON. EXITING."
+        return 252
+    fi
+
+    if declare -p __D_LIB_PACKAGES_INIT >/dev/null 2>&1; then
+        if [[ ${#__D_LIB_PACKAGES_INIT[@]} -gt 0 ]]; then
+            __LIB_PACKAGES_INIT=("${__D_LIB_PACKAGES_INIT[@]}")
+        fi
     fi
 
     if [[ ${#__LIB_PACKAGES_INIT[@]} -gt 0 ]]; then
         for __T_PI in "${__LIB_PACKAGES_INIT[@]}"; do
-            if ! __lib_package_load "${__T_PI}"; then
-                echo "COULD NOT LOAD PACKAGE: '${__T_PI}'."
+            if __lib_package_load "${__T_PI}"; then
+                true
+            else
+                echo "COULD NOT LOAD PACKAGE: '${__T_PI}' ($?)."
                 return 254
             fi
         done
     fi
-
     return 0
 }
 
@@ -454,13 +500,18 @@ function __lib_init_defaults() {
 #
 # - __lib_init_os_information()
 #
-# Checks if /etc/os-release exists. If so, sources it into the environment.
+# - Description
+#   Checks if /etc/os-release exists. If so, sources it into the environment.
 #
-# If not, checks for the os version by other means. if successfull, it exports
-# at least ID and VERSION_ID
+#   If not, checks for the os version by other means. if successfull, it exports
+#   at least ID and VERSION_ID
 #
-# return 0 on success
-# return 1 on no success
+# - Parameters
+#   - NONE.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
 #
 function __lib_init_os_information() {
 
@@ -470,86 +521,93 @@ function __lib_init_os_information() {
     if [[ -f /etc/os-release ]]; then
         if source /etc/os-release; then
             return 0
+        else
+            return 1
         fi
-        return 1
+    elif [[ -f /etc/centos-release ]]; then
+        __T_TEST_VAL="$(cat /etc/centos-release)"
+        if [[ ${__T_TEST_VAL} =~ ${__T_REGEX_CENTOS6} ]]; then
+            declare -gx ID="centos"
+            declare -gx NAME="CentOS"
+            declare -gx VERSION_ID="6"
+            return 0
+        else
+            return 1
+        fi
     else
-        if [[ -f /etc/centos-release ]]; then
-            __T_TEST_VAL="$(cat /etc/centos-release)"
-            if [[ ${__T_TEST_VAL} =~ ${__T_REGEX_CENTOS6} ]]; then
-                export ID="centos"
-                export NAME="CentOS"
-                export VERSION_ID="6"
-                return 0
-            fi
-        fi
+        return 1
     fi
-    return 1
+    return 254
 }
-
+#####
+#
+# - __lib_loaded
+#
+# - Description
+#   Checks if the library has been loaded and returns the status.
+#
+# - Parameters
+#   - NONE.
+#
+# - Return values
+#   - 0 when loaded.
+#   - 1 when not loaded.
+#
 function __lib_loaded() {
-
-    if [[ -n ${G_LIB_LOADED+x} ]]; then
-        if [[ "${G_LIB_LOADED}x" != "x" ]]; then
-            if [[ "${G_LIB_LOADED}" == "true" ]] || [[ "${G_LIB_LOADED}" == "1" ]]; then
-                return 0
-            fi
-        fi
+    if [[ -n ${G_LIB_LOADED:+x} ]]; then
+        return 0
+    else
+        return 1
     fi
-    echo "LIBRARY NOT LOADED. EXITING."
-    exit 254
 }
 #####
 #
 # - __lib_package_create_all
 #
-# Searches for all available versions of a file in the combination
-# of DISTRIBUTION_ID,DISTRIBUTION_VERSION_ID and STAGE and returns
-# a concatenation of said files to stdout based on their order
-# of significance. The more significant the later the output.
+# - Description
+#   Searches for all available versions of a file in the combination
+#   of DISTRIBUTION_ID,DISTRIBUTION_VERSION_ID and STAGE and returns
+#   a concatenation of said files to stdout based on their order
+#   of significance. The more significant the later the output.
 #
 # - Paramters:
-# - #1: Filename to search for
-# - #2: The distribution id to use
-# - #3: the distribution version id to use
-# - #4: the stages to search separated by a comma (",")
+#   - #1 [IN|MANDATORY]: FILENAME - The filename to search for.
+#   - #2 [IN|MANDATORY]: DISTRIBUTION_ID - ID from /etc/os-release.
+#   - #3 [IN|MANDATORY]: DISTRIBUTION_VERSION_ID - VERSION_ID from /etc/os-release.
+#   - #4+ [IN|MANDATORY]: STAGE_NAME - One or more names of library stages to be searched in.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
 #
 function __lib_package_create_all() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
-        return 2
+        return 101
     else
         declare __P_FILENAME="${@:1:1}"
     fi
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 3
+        return 102
     else
         declare __P_DISTRIBUTION_ID="${@:2:1}"
     fi
     if [[ "${@:3:1}x" == "x" ]]; then
-        return 4
+        return 103
     else
         declare __P_DISTRIBUTION_VERSION_ID="${@:3:1}"
     fi
+
     if [[ "${@:4:1}x" == "x" ]]; then
-        return 5
+        return 104
     else
-        declare __P_STAGES_IFS="${@:4:1}"
+        declare -a __P_STAGES=("${@:4}")
     fi
 
     declare -a __T_FILES=()
-    declare __T_STAGE=""
     declare -a __T_TEST_DIRECTORIES=()
-    # filled later
-    # declare __T_STAGES=()
 
-    if declare -p "${__P_STAGES_IFS}" >/dev/null 2>&1; then
-        declare -n __T_STAGES="${__P_STAGES_IFS}"
-    else
-        declare -a __T_STAGES=()
-        IFS="," read -ra __T_STAGES <<<"${__P_STAGES_IFS}"
-    fi
-
-    for __T_STAGE in "${__T_STAGES[@]}"; do
+    for __T_STAGE in "${__P_STAGES[@]}"; do
         __T_W_DIR1="${G_IMAGES_DIR%%/}/${__T_STAGE,,}"
 
         for __T_DISTRO in all ${__P_DISTRIBUTION_ID,,}; do
@@ -599,70 +657,85 @@ function __lib_package_create_all() {
 #
 # - __lib_packages_create_all_file
 #
-# Uses __lib_package_create_all to get all the files
-# and store their content in a file.
+# - Description
+#   Uses __lib_package_create_all to get all the files and store their content in a file.
 #
 # - Paramters:
-# - #1: Filename to store the results
-# - #2: NEEDLE Filename to search for
-# - #3: The distribution id to use
-# - #4: the distribution version id to use
-# - #5: the stages to search separated by a comma (",")
+#   - #1 [IN|MANDATORY]: FILENAME - Filename including path where the results should be stored.
+#   - #2 [IN|MANDATORY]: NEEDLE - Filename to search for.
+#   - #3 [IN|MANDATORY]: DISTRIBUTION_ID: The distribution id to use (from /etc/os-release).
+#   - #4 [IN|MANDATORY]: DISTRIBUTION_VERSION_ID: The distribution version id to use (from /etc/os-release).
+#   - #5+ [IN|MANDATORY]: STAGE_NAME: One ore more names of library stages to be searched for the files.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
 #
 function __lib_package_create_all_file() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
-        return 2
+        return 101
     else
         declare __P_FILENAME="${@:1:1}"
     fi
     if [[ "${@:2:1}x" == "x" ]]; then
-        return 3
+        return 102
     else
         declare __P_NEEDLE_FILENAME="${@:2:1}"
     fi
     if [[ "${@:3:1}x" == "x" ]]; then
-        return 4
+        return 103
     else
         declare __P_DISTRIBUTION_ID="${@:3:1}"
     fi
     if [[ "${@:4:1}x" == "x" ]]; then
-        return 5
+        return 104
     else
         declare __P_DISTRIBUTION_VERSION_ID="${@:4:1}"
     fi
     if [[ "${@:5:1}x" == "x" ]]; then
-        return 6
+        return 105
     else
-        declare __P_STAGES_IFS="${@:5:1}"
+        declare -a __P_STAGES=("${@:5}")
     fi
 
-    if __lib_package_create_all "${__P_NEEDLE_FILENAME}" "${__P_DISTRIBUTION_ID}" "${__P_DISTRIBUTION_VERSION_ID}" "${__P_STAGES_IFS}" >"${__P_FILENAME}"; then
+    if __lib_package_create_all "${__P_NEEDLE_FILENAME}" "${__P_DISTRIBUTION_ID}" "${__P_DISTRIBUTION_VERSION_ID}" "${__P_STAGES[@]}" >"${__P_FILENAME}"; then
         return 0
+    else
+        return 1
     fi
-    return 1
+    return 254
 
 }
 #####
 #
 # - __lib_package_load
 #
-# Takes the packagename and loads the files
+# - Description
+#   Takes the packagename and loads the file if found.
 #
-# - When in run or install mode, it only needs the package name.
-# - When in build mode it also needs the other paramters.
+#   - When in run or install mode, it only needs the package name.
+#   - When in build mode it also needs the other paramters.
 #
 # - Paramters:
+#   - #1 [IN|MANDATORY]: PACKAGENAME - The name of the package to be loaded.
 #
-# - #1: PACKAGENAME - the name of the package to be loaded
-# - #2: DISTRIBUTION_ID: the distribution id
-# - #3: DISTRIBUTION_VERSION_ID: the version of the distribution
-# - #4: STAGES_IFS - the stages, separated by a comma ","
+#   The following parameters are only needed when the library is in build stage.
+#   If not provided, the library will use ID, VERSION_ID from the environment and
+#   the stage names "base" and "build".
+#
+#   - #2 [IN|MANDATORY]: DISTRIBUTION_ID: The distribution id from /etc/os-release.
+#   - #3 [IN|MANDATORY]: DISTRIBUTION_VERSION_ID: The version ID of the distribution from /etc/os-release.
+#   - #4+ [IN|MANDATORY]: STAGE_NAME - One ore more names of the library stages to be searched.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
 #
 function __lib_package_load() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
-        return 2
+        return 101
     else
         declare __P_PACKAGENAME="${@:1:1}"
     fi
@@ -680,13 +753,9 @@ function __lib_package_load() {
     fi
 
     if [[ "${@:4:1}x" == "x" ]]; then
-        declare __P_STAGES_IFS="base,build"
+        declare -a __P_STAGES=("base" "build")
     else
-        declare __P_STAGES_IFS="${@:4:1}"
-    fi
-
-    if [[ -z ${__LIB_PACKAGES_LOADED[@]+x} ]]; then
-        declare -Ag __LIB_PACKAGES_LOADED=()
+        declare -a __P_STAGES=("${@:4}")
     fi
 
     if [[ -n ${__LIB_PACKAGES_LOADED["${__P_PACKAGENAME,,}"]:+x} ]]; then
@@ -695,15 +764,13 @@ function __lib_package_load() {
 
     declare __T_DISTRIBUTION_ID="${__P_DISTRIBUTION_ID}"
     declare __T_DISTRIBUTION_VERSION_ID="${__P_DISTRIBUTION_VERSION_ID}"
-    declare __T_STAGES_IFS="${__P_STAGES_IFS}"
+    declare -a __T_STAGES=("${__P_STAGES[@]}")
     declare __T_PACKAGE_FILENAME=""
 
     if __lib_filename_from_libname "${__P_PACKAGENAME}" __T_PACKAGE_FILENAME; then
         true
     else
-        __T_ERROR=$?
-        __log e -- "COULD NOT find '${__P_PACKAGENAME}'."
-        return ${__T_ERROR}
+        return 111
     fi
 
     if [[ "${G_LIB_STAGE}" == "init" || "${G_LIB_STAGE}" == "installer" ]]; then
@@ -716,14 +783,14 @@ function __lib_package_load() {
         return 1
     elif [[ "${G_LIB_STAGE}" == "build" ]]; then
         if ! declare -p GLOBAL_DEBUG >/dev/null 2>&1 || [[ "${GLOBAL_DEBUG}x" == "x" ]]; then
-            if source <(__lib_package_create_all "${__T_PACKAGE_FILENAME}" "${__T_DISTRIBUTION_ID}" "${__T_DISTRIBUTION_VERSION_ID}" "${__T_STAGES_IFS}"); then
+            if source <(__lib_package_create_all "${__T_PACKAGE_FILENAME}" "${__T_DISTRIBUTION_ID}" "${__T_DISTRIBUTION_VERSION_ID}" "${__T_STAGES[@]}"); then
                 __LIB_PACKAGES_LOADED["${__P_PACKAGENAME,,}"]=1
                 return 0
             fi
         else
             declare __T_MKTEMP="$(mktemp)"
             __LIB_DEBUG_FILES+=("${__T_MKTEMP}")
-            if __lib_package_create_all_file "${__T_MKTEMP}" "${__T_PACKAGE_FILENAME}" "${__T_DISTRIBUTION_ID}" "${__T_DISTRIBUTION_VERSION_ID}" "${__T_STAGES_IFS}"; then
+            if __lib_package_create_all_file "${__T_MKTEMP}" "${__T_PACKAGE_FILENAME}" "${__T_DISTRIBUTION_ID}" "${__T_DISTRIBUTION_VERSION_ID}" "${__T_STAGES[@]}"; then
                 if source "${__T_MKTEMP}"; then
                     __LIB_PACKAGES_LOADED["${__P_PACKAGENAME,,}"]=1
                     return 0
@@ -779,7 +846,7 @@ function __lib_require() {
 
     declare __T_LOAD_OPTIONS=()
     if [[ "${G_LIB_STAGE}" == "build" ]]; then
-        __T_LOAD_OPTIONS+=("${ID}" "${VERSION_ID}" "base,build")
+        __T_LOAD_OPTIONS+=("${ID}" "${VERSION_ID}" "base" "build")
     fi
 
     for __T_PACKAGE in "${__P_PACKAGENAMES[@]}"; do

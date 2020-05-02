@@ -43,6 +43,8 @@ set -o nounset
 # - Takes an associative array of values and an associative array of column definitions and calculates/formats/prints
 #   the columns/rows to stdout
 #
+# - There are examples in the main init script as well as the test library.
+#
 # - The format array follows a certain order, as does the data array...
 #
 # - === FORMAT ARRAY === 
@@ -330,8 +332,6 @@ set -o nounset
 #
 #   The both values mentioned before can be useful to colorize the column's value by putting
 #   ANSI color escape codes in the PREFIX and SUFFIX settings.
-#
-#   A good example of this can be seen in the testlib provided with this scripts collection.
 #
 # - ====== _DATA_VALUE_REGEX_NOMATCH_PREFIX ======
 #
@@ -655,12 +655,214 @@ function __print_table() {
 }
 #####
 #
+# - __print_table_cell
+#
+# - Description
+#   Takes the content, format, column- and row name and prints the cell of the table that the data refers to.
+#
+# - Parameters
+#   - #1 - [IN|MANDATORY]: CONTENT - The content to be displayed.
+#   - #2 - [IN|MANDATORY]: COLUMN - The column format information.
+#   - #3 - [IN|MANDATORY]: ROWNAME - The name of the currently worked on row.
+#   - #4 - [IN|MANDATORY]: CONTENTNAME - The name of the currently worked on column.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
+function __print_table_cell() {
+
+    declare __T_REGEX_ARRAY_ASSOCIATIVE='^declare -[^\ ]*A[^\ ]*\ .*$'
+    declare __T_REGEX_TEXT_VARNAME_VALID='^[a-zA-Z0-9_]+$'
+
+    if [[ "${@:1:1}x" == "x" ]]; then
+        return 2
+    elif __T_RESULT="$(declare -p "${@:1:1}" 2>/dev/null)"; then
+        if [[ "${__T_RESULT}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
+            declare -n __P_CONTENT="${@:1:1}"
+        else
+            return 3
+        fi
+    else
+        return 4
+    fi
+
+    if [[ "${@:2:1}x" == "x" ]]; then
+        return 5
+    elif __T_RESULT="$(declare -p "${@:2:1}" 2>/dev/null)"; then
+        if [[ "${__T_RESULT}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
+            declare -n __P_COLUMN="${@:2:1}"
+        else
+            return 6
+        fi
+    else
+        return 7
+    fi
+
+    if [[ "${@:3:1}x" == "x" ]]; then
+        return 8
+    else
+        declare __P_ROWNAME="${@:3:1}"
+    fi
+
+    if [[ "${@:4:1}x" == "x" ]]; then
+        declare __P_CONTENTNAME=""
+    else
+        declare __P_CONTENTNAME="${@:4:1}"
+    fi
+    if [[ -z ${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]+x} ]]; then
+        declare -A __T_VRMPA=()
+    elif [[ "${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]}x" == "x" ]]; then
+        declare -A __T_VRMPA=()
+    else
+        if __T_RES="$(declare -p "${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]}" 2>/dev/null)"; then
+            if [[ "${__T_RES}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
+                declare -n __T_VRMPA="${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]}"
+            else
+                declare -A __T_VRMPA=()
+            fi
+        fi
+    fi
+
+    if [[ -z ${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]+x} ]]; then
+        declare -A __T_VRMSA=()
+    elif [[ "${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]}x" == "x" ]]; then
+        declare -A __T_VRMSA=()
+    else
+        if __T_RES="$(declare -p "${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]}" 2>/dev/null)"; then
+            if [[ "${__T_RES}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
+                declare -n __T_VRMSA="${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]}"
+            else
+                declare -A __T_VRMSA=()
+            fi
+        fi
+    fi
+
+    if [[ "${__P_CONTENTNAME}x" != "x" ]]; then
+        if [[ -z ${__P_CONTENT[${__P_CONTENTNAME}]+x} ]]; then
+            return 99
+        else
+            declare __T_VALUE="${__P_CONTENT[${__P_CONTENTNAME}]}"
+            declare __T_ALIGN="${__P_COLUMN[ALIGN]}"
+
+            if [[ "${__P_COLUMN[VALUE_DISPLAY_NAME]}x" == "x" ]]; then
+                if [[ "${__T_VALUE}" =~ ${__P_COLUMN[VALUE_REGEX]} ]]; then
+                    declare __T_BASH_REMATCH_INDEX=${__P_COLUMN[VALUE_REGEX_MATCH]}
+                    if [[ -z ${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]+x} ]]; then
+                        declare __T_BASH_REMATCH="${BASH_REMATCH[0]}"
+                    else
+                        declare __T_BASH_REMATCH="${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]}"
+                    fi
+                    if [[ "${__T_BASH_REMATCH}" =~ ${__T_REGEX_TEXT_VARNAME_VALID} ]]; then
+                        if [[ -z ${__T_VRMPA[${__T_BASH_REMATCH}]+x} ]]; then
+                            declare __T_VALUE_FINAL="${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX]}"
+                        else
+                            declare __T_VALUE_FINAL="${__T_VRMPA[${__T_BASH_REMATCH}]}"
+                        fi
+                        __T_VALUE_FINAL+="${__T_BASH_REMATCH}"
+                        if [[ -z ${__T_VRMSA[${__T_BASH_REMATCH}]+x} ]]; then
+                            __T_VALUE_FINAL+="${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX]}"
+                        else
+                            __T_VALUE_FINAL+="${__T_VRMSA[${__T_BASH_REMATCH}]}"
+                        fi
+                    else
+                        declare __T_VALUE_FINAL="${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX]}${__T_BASH_REMATCH}${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX]}"
+                    fi
+                else
+                    declare __T_VALUE_FINAL="${__P_COLUMN[VALUE_REGEX_NOMATCH_PREFIX]}${__T_VALUE}${__P_COLUMN[VALUE_REGEX_NOMATCH_SUFFIX]}"
+                fi
+            else
+                if [[ "${__P_ROWNAME}" =~ ${__P_COLUMN[VALUE_DISPLAY_NAME_REGEX]} ]]; then
+                    declare __T_BASH_REMATCH_INDEX=${__P_COLUMN[VALUE_DISPLAY_NAME_REGEX_INDEX]}
+                    if [[ -z ${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]+x} ]]; then
+                        if [[ -z ${BASH_REMATCH[1]+x} ]]; then
+                            return 235
+                        else
+                            declare __T_VALUE="${BASH_REMATCH[1]}"
+                            declare __T_VALUE_FINAL="${BASH_REMATCH[1]}"
+                        fi
+                    else
+                        declare __T_VALUE="${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]}"
+                        declare __T_VALUE_FINAL="${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]}"
+                    fi
+                else
+                    declare __T_VALUE="${__P_ROWNAME}"
+                    declare __T_VALUE_FINAL="${__P_ROWNAME}"
+                fi
+            fi
+        fi
+    else
+        if [[ "${__P_ROWNAME}" == "__HEADER__" ]]; then
+            declare __T_VALUE="${__P_COLUMN[HEADER_TEXT]}"
+            declare __T_VALUE_FINAL="${__P_COLUMN[HEADER_TEXT]}"
+            declare __T_ALIGN="${__P_COLUMN[HEADER_ALIGN]}"
+        elif [[ "${__P_ROWNAME}" == "__TOTAL__" ]]; then
+            if [[ "${__P_COLUMN[VALUE_CALCULATE_TOTAL]}x" != "x" ]]; then
+                declare __T_VALUE="${__P_COLUMN[VALUE_TOTAL]}"
+                declare __T_VALUE_FINAL="${__T_VALUE}"
+                declare __T_ALIGN="${__P_COLUMN[ALIGN]}"
+            else
+                declare __T_VALUE=""
+                declare __T_VALUE_FINAL="${__T_VALUE}"
+                declare __T_ALIGN="${__P_COLUMN[ALIGN]}"
+            fi
+        else
+            return 123
+        fi
+    fi
+    declare __T_WIDTH_MAX="${__P_COLUMN[MAX_WIDTH]}"
+    declare __T_DELIMITER="${__P_COLUMN[DELIMITER]}"
+    declare __T_VALUE_NOESCAPES=""
+    if __T_VALUE_NOESCAPES="$(echo -e "${__T_VALUE_FINAL}" | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g')"; then
+        true
+    else
+        __T_VALUE_NOESCAPES="${__T_VALUE_FINAL}"
+    fi
+    declare __T_WIDTH_MAXWO=$((${__T_WIDTH_MAX} - ${#__T_VALUE_NOESCAPES}))
+    if [[ "${__T_ALIGN}" == "l" ]]; then
+        declare __T_WIDTH_LEFT=1
+        declare __T_WIDTH_RIGHT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_LEFT}))
+    elif [[ "${__T_ALIGN}" == "r" ]]; then
+        declare __T_WIDTH_RIGHT=1
+        declare __T_WIDTH_LEFT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_RIGHT}))
+    elif [[ "${__T_ALIGN}" == "c" ]]; then
+        declare __T_WIDTH_LEFT=$((${__T_WIDTH_MAXWO} / 2))
+        declare __T_WIDTH_RIGHT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_LEFT}))
+    elif [[ "${__T_ALIGN}" == "cr" ]]; then
+        declare __T_WIDTH_RIGHT=$((${__T_WIDTH_MAXWO} / 2))
+        declare __T_WIDTH_LEFT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_RIGHT}))
+    fi
+
+    declare -i __SPACER=${__T_WIDTH_LEFT}
+
+    while [[ ${__SPACER} -gt 0 ]]; do
+        __print_table_print " "
+        ((__SPACER--))
+    done
+    __print_table_print "${__T_VALUE_FINAL}"
+    declare -i __SPACER=${__T_WIDTH_RIGHT}
+    while [[ ${__SPACER} -gt 0 ]]; do
+        __print_table_print " "
+        ((__SPACER--))
+    done
+    return 0
+
+}
+#####
+#
 # - __print_table_column_prepare
 #
-# Takes the associative arrays of data and format and prepares/calculates the columns.
+# - Description
+#   Takes the associative arrays of data and format and prepares/calculates the columns and rows.
 #
-# Returns 0 on success
-# Reeturns > 0 on failure
+# - Parameters
+#   - #1 - [IN|MANDATORY]: CONTENT - The associative array containing the content to be displayed.
+#   - #2 - [IN|MANDATORY]: FORMAT - The associative array containing the format information.
+#   - #3 - [OUT|MANDATORY]: ROWNAMES - An existing, empty, array to be filled with the names of the rows.
+#
+# - Return values
+#   - 0 on success
+#   - >0 on failure
 #
 function __print_table_column_prepare() {
 
@@ -840,6 +1042,21 @@ function __print_table_column_prepare() {
 
     return 0
 }
+#####
+#
+# - __print_table_print
+#
+# - Description
+#   The function that is used by all other functions to create output on the screen. This is more or less here
+#   so that it can be overwritten to suite other needs.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: LINE - The line to be printed.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
 function __print_table_print() {
     echo -en "${@}" >&2
 }
@@ -847,11 +1064,18 @@ function __print_table_print() {
 #
 # - __print_table_rows_print
 #
-# Takes the associative arrays of data and format and prints out the rows.
-# It also formats the output.
+# - Description
+#   Takes the associative arrays of data and format and prints out the rows.
+#   It also formats the output.
 #
-# Returns 0 on success
-# Returns 1 on failure
+# - Parameters
+#   - #1 - [IN|MANDATORY]: CONTENT - The associative array containing the content to be displayed.
+#   - #2 - [IN|MANDATORY]: COLUMNS - The associative array containing the format information.
+#   - #3 - [IN|MANDATORY]: ROWNAMES - The array containing the list of row names that are to be printed.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
 #
 function __print_table_rows_print() {
 
@@ -893,7 +1117,7 @@ function __print_table_rows_print() {
     declare __T_HEADER_LINE=""
     for __T_COLUMNNUMBER in "${__T_COLUMNNUMBERS[@]}"; do
         declare -n __T_COLUMN="${__P_COLUMNS[${__T_COLUMNNUMBER}]}"
-        if __print_table_column_print "${!__P_CONTENT}" "${!__T_COLUMN}" "__HEADER__"; then
+        if __print_table_cell "${!__P_CONTENT}" "${!__T_COLUMN}" "__HEADER__"; then
             for __T_I in $(seq 1 ${__T_COLUMN[MAX_WIDTH]}); do
                 __T_HEADER_LINE+="="
             done
@@ -927,7 +1151,7 @@ function __print_table_rows_print() {
                         declare __T_BASH_REMATCH="${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]}"
                     fi
                     if [[ "${__T_BASH_REMATCH}" == "${__T_ROWNAME}" ]]; then
-                        if __print_table_column_print "${!__P_CONTENT}" "${!__T_COLUMN}" "${__T_ROWNAME}" "${__T_CONTENTNAME}"; then
+                        if __print_table_cell "${!__P_CONTENT}" "${!__T_COLUMN}" "${__T_ROWNAME}" "${__T_CONTENTNAME}"; then
                             if [[ ${__T_COLUMNNUMBER} -ne ${__T_COLUMNNUMBERS[-1]} ]]; then
                                 __print_table_print "${__T_COLUMN[DELIMITER]}"
                             fi
@@ -972,7 +1196,7 @@ function __print_table_rows_print() {
                 __T_COLUMN[VALUE_TOTAL]="Total:"
                 __T_COLUMN[VALUE_CALCULATE_TOTAL]=1
             fi
-            if __print_table_column_print "${!__P_CONTENT}" "${!__T_COLUMN}" "__TOTAL__"; then
+            if __print_table_cell "${!__P_CONTENT}" "${!__T_COLUMN}" "__TOTAL__"; then
                 if [[ ${__T_COLUMNNUMBER} -ne ${__T_COLUMNNUMBERS[-1]} ]]; then
                     __print_table_print "${__T_COLUMN[DELIMITER]}"
                 fi
@@ -984,192 +1208,5 @@ function __print_table_rows_print() {
             fi
         done
     fi
-
-}
-#####
-#
-# - __print_table_column_print
-#
-# Takes the column information and prints it out with the help of the associative arrays for data and format.
-#
-# Returns 0 on success
-# Returns > 0 on failure
-#
-function __print_table_column_print() {
-
-    declare __T_REGEX_ARRAY_ASSOCIATIVE='^declare -[^\ ]*A[^\ ]*\ .*$'
-    declare __T_REGEX_TEXT_VARNAME_VALID='^[a-zA-Z0-9_]+$'
-
-    if [[ "${@:1:1}x" == "x" ]]; then
-        return 2
-    elif __T_RESULT="$(declare -p "${@:1:1}" 2>/dev/null)"; then
-        if [[ "${__T_RESULT}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
-            declare -n __P_CONTENT="${@:1:1}"
-        else
-            return 3
-        fi
-    else
-        return 4
-    fi
-
-    if [[ "${@:2:1}x" == "x" ]]; then
-        return 5
-    elif __T_RESULT="$(declare -p "${@:2:1}" 2>/dev/null)"; then
-        if [[ "${__T_RESULT}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
-            declare -n __P_COLUMN="${@:2:1}"
-        else
-            return 6
-        fi
-    else
-        return 7
-    fi
-
-    if [[ "${@:3:1}x" == "x" ]]; then
-        return 8
-    else
-        declare __P_ROWNAME="${@:3:1}"
-    fi
-
-    if [[ "${@:4:1}x" == "x" ]]; then
-        declare __P_CONTENTNAME=""
-    else
-        declare __P_CONTENTNAME="${@:4:1}"
-    fi
-    if [[ -z ${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]+x} ]]; then
-        declare -A __T_VRMPA=()
-    elif [[ "${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]}x" == "x" ]]; then
-        declare -A __T_VRMPA=()
-    else
-        if __T_RES="$(declare -p "${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]}" 2>/dev/null)"; then
-            if [[ "${__T_RES}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
-                declare -n __T_VRMPA="${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX_ARRAY]}"
-            else
-                declare -A __T_VRMPA=()
-            fi
-        fi
-    fi
-
-    if [[ -z ${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]+x} ]]; then
-        declare -A __T_VRMSA=()
-    elif [[ "${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]}x" == "x" ]]; then
-        declare -A __T_VRMSA=()
-    else
-        if __T_RES="$(declare -p "${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]}" 2>/dev/null)"; then
-            if [[ "${__T_RES}" =~ ${__T_REGEX_ARRAY_ASSOCIATIVE} ]]; then
-                declare -n __T_VRMSA="${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX_ARRAY]}"
-            else
-                declare -A __T_VRMSA=()
-            fi
-        fi
-    fi
-
-    if [[ "${__P_CONTENTNAME}x" != "x" ]]; then
-        if [[ -z ${__P_CONTENT[${__P_CONTENTNAME}]+x} ]]; then
-            return 99
-        else
-            declare __T_VALUE="${__P_CONTENT[${__P_CONTENTNAME}]}"
-            declare __T_ALIGN="${__P_COLUMN[ALIGN]}"
-
-            if [[ "${__P_COLUMN[VALUE_DISPLAY_NAME]}x" == "x" ]]; then
-                if [[ "${__T_VALUE}" =~ ${__P_COLUMN[VALUE_REGEX]} ]]; then
-                    declare __T_BASH_REMATCH_INDEX=${__P_COLUMN[VALUE_REGEX_MATCH]}
-                    if [[ -z ${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]+x} ]]; then
-                        declare __T_BASH_REMATCH="${BASH_REMATCH[0]}"
-                    else
-                        declare __T_BASH_REMATCH="${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]}"
-                    fi
-                    if [[ "${__T_BASH_REMATCH}" =~ ${__T_REGEX_TEXT_VARNAME_VALID} ]]; then
-                        if [[ -z ${__T_VRMPA[${__T_BASH_REMATCH}]+x} ]]; then
-                            declare __T_VALUE_FINAL="${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX]}"
-                        else
-                            declare __T_VALUE_FINAL="${__T_VRMPA[${__T_BASH_REMATCH}]}"
-                        fi
-                        __T_VALUE_FINAL+="${__T_BASH_REMATCH}"
-                        if [[ -z ${__T_VRMSA[${__T_BASH_REMATCH}]+x} ]]; then
-                            __T_VALUE_FINAL+="${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX]}"
-                        else
-                            __T_VALUE_FINAL+="${__T_VRMSA[${__T_BASH_REMATCH}]}"
-                        fi
-                    else
-                        declare __T_VALUE_FINAL="${__P_COLUMN[VALUE_REGEX_MATCH_PREFIX]}${__T_BASH_REMATCH}${__P_COLUMN[VALUE_REGEX_MATCH_SUFFIX]}"
-                    fi
-                else
-                    declare __T_VALUE_FINAL="${__P_COLUMN[VALUE_REGEX_NOMATCH_PREFIX]}${__T_VALUE}${__P_COLUMN[VALUE_REGEX_NOMATCH_SUFFIX]}"
-                fi
-            else
-                if [[ "${__P_ROWNAME}" =~ ${__P_COLUMN[VALUE_DISPLAY_NAME_REGEX]} ]]; then
-                    declare __T_BASH_REMATCH_INDEX=${__P_COLUMN[VALUE_DISPLAY_NAME_REGEX_INDEX]}
-                    if [[ -z ${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]+x} ]]; then
-                        if [[ -z ${BASH_REMATCH[1]+x} ]]; then
-                            return 235
-                        else
-                            declare __T_VALUE="${BASH_REMATCH[1]}"
-                            declare __T_VALUE_FINAL="${BASH_REMATCH[1]}"
-                        fi
-                    else
-                        declare __T_VALUE="${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]}"
-                        declare __T_VALUE_FINAL="${BASH_REMATCH[${__T_BASH_REMATCH_INDEX}]}"
-                    fi
-                else
-                    declare __T_VALUE="${__P_ROWNAME}"
-                    declare __T_VALUE_FINAL="${__P_ROWNAME}"
-                fi
-            fi
-        fi
-    else
-        if [[ "${__P_ROWNAME}" == "__HEADER__" ]]; then
-            declare __T_VALUE="${__P_COLUMN[HEADER_TEXT]}"
-            declare __T_VALUE_FINAL="${__P_COLUMN[HEADER_TEXT]}"
-            declare __T_ALIGN="${__P_COLUMN[HEADER_ALIGN]}"
-        elif [[ "${__P_ROWNAME}" == "__TOTAL__" ]]; then
-            if [[ "${__P_COLUMN[VALUE_CALCULATE_TOTAL]}x" != "x" ]]; then
-                declare __T_VALUE="${__P_COLUMN[VALUE_TOTAL]}"
-                declare __T_VALUE_FINAL="${__T_VALUE}"
-                declare __T_ALIGN="${__P_COLUMN[ALIGN]}"
-            else
-                declare __T_VALUE=""
-                declare __T_VALUE_FINAL="${__T_VALUE}"
-                declare __T_ALIGN="${__P_COLUMN[ALIGN]}"
-            fi
-        else
-            return 123
-        fi
-    fi
-    declare __T_WIDTH_MAX="${__P_COLUMN[MAX_WIDTH]}"
-    declare __T_DELIMITER="${__P_COLUMN[DELIMITER]}"
-    declare __T_VALUE_NOESCAPES=""
-    if __T_VALUE_NOESCAPES="$(echo -e "${__T_VALUE_FINAL}" | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g')"; then
-        true
-    else
-        __T_VALUE_NOESCAPES="${__T_VALUE_FINAL}"
-    fi
-    declare __T_WIDTH_MAXWO=$((${__T_WIDTH_MAX} - ${#__T_VALUE_NOESCAPES}))
-    if [[ "${__T_ALIGN}" == "l" ]]; then
-        declare __T_WIDTH_LEFT=1
-        declare __T_WIDTH_RIGHT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_LEFT}))
-    elif [[ "${__T_ALIGN}" == "r" ]]; then
-        declare __T_WIDTH_RIGHT=1
-        declare __T_WIDTH_LEFT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_RIGHT}))
-    elif [[ "${__T_ALIGN}" == "c" ]]; then
-        declare __T_WIDTH_LEFT=$((${__T_WIDTH_MAXWO} / 2))
-        declare __T_WIDTH_RIGHT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_LEFT}))
-    elif [[ "${__T_ALIGN}" == "cr" ]]; then
-        declare __T_WIDTH_RIGHT=$((${__T_WIDTH_MAXWO} / 2))
-        declare __T_WIDTH_LEFT=$((${__T_WIDTH_MAXWO} - ${__T_WIDTH_RIGHT}))
-    fi
-
-    declare -i __SPACER=${__T_WIDTH_LEFT}
-
-    while [[ ${__SPACER} -gt 0 ]]; do
-        __print_table_print " "
-        ((__SPACER--))
-    done
-    __print_table_print "${__T_VALUE_FINAL}"
-    declare -i __SPACER=${__T_WIDTH_RIGHT}
-    while [[ ${__SPACER} -gt 0 ]]; do
-        __print_table_print " "
-        ((__SPACER--))
-    done
-    return 0
 
 }

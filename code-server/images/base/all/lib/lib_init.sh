@@ -56,7 +56,7 @@ fi
 #   the __START_PARAMETERS array and produces and error.
 #
 # - Parameters:
-#   None.
+#   - None.
 #
 # - Return Values:
 #   - 0 on success.
@@ -78,7 +78,6 @@ function __init_codeserver_startup_options_gather() {
         __CODESERVER_STARTUP_OPTIONS["${__T_OPT}"]=1
     done < <("${__CODESERVER_EXEC}" --help 2>&1 | grep -E '^[\ |\t]+-.*$' | sed -E 's/.*--([a-zA-Z0-9_\-]+)[\ |\t]+.*$/\1/g' | grep -v '^(help|open|force|install-extension|uninstall-extension|show-versions)$')
 }
-
 #####
 #
 # - __init_codeserver_startup_options_available
@@ -232,11 +231,15 @@ function __init_function_register_always() {
 #   Takes the name of a stage, old function, new existing function and replaces it.
 #
 # - Parameters:
-#   - #1 [IN|MANDATORY]: STAGENAME - Name of the stage to work on.
-#                                    This can take the special word "all" in which case the function
-#                                    will be replaced in all registered stages found.
-#   - #2 [IN|MANDATORY]: FUNCTIONNAME_OLD - The name of the function that is to be replaced.
-#   - #3 [IN|MANDATORY]: FUNCTIONNAME_NEW - The name of the new, existing function that should take the place.
+#   - #1 [IN|MANDATORY]: STAGENAME
+#       Name of the stage to work on. This can take the special word "all" in which
+#       case the function will be replaced in all registered stages found.
+#
+#   - #2 [IN|MANDATORY]: FUNCTIONNAME_OLD
+#       The name of the function that is to be replaced.
+#
+#   - #3 [IN|MANDATORY]: FUNCTIONNAME_NEW
+#       The name of the new, existing function that should take the place.
 #
 # - Return values:
 #   - 0 on success.
@@ -310,9 +313,10 @@ function __init_function_register_replace() {
 #   Takes the name of a stage and a function and checks if the function is registered in said stage.
 #
 # - Parameters:
-#   - #1 [IN|MANDATORY]: STAGENAME - Name of the stage.
-#                       Takes the special word "all". Searches over all registered stages and as soon
-#                       as one stage is found where the function is NOT registered, returns 1.
+#   - #1 [IN|MANDATORY]: STAGENAME
+#       Name of the stage. Takes the special word "all". Searches over all registered stages
+#       and as soon as one stage is found where the function is NOT registered, returns 1.
+#
 #   - #2 [IN|MANDATORY]: FUNCTIONNAME - Name of the function to search for.
 #
 # - Return values:
@@ -375,9 +379,10 @@ function __init_function_registered() {
 #   Takes the name of a stage and a function and unregisters it from said stage if found.
 #
 # - Paramters:
-#   - #1 [IN|MANDATORY]: STAGENAME - Name of the stage.
-#                           Accepts "all". In this case it unregisters the function
-#                           from all stages it is found in.
+#   - #1 [IN|MANDATORY]: STAGENAME
+#       Name of the stage. Accepts "all". In this case it unregisters the function
+#       from all stages it is found in.
+#
 #   - #2 [IN|MANDATORY]: FUNCTIONNAME - Name of the function to remove.
 #
 # - Return values:
@@ -492,7 +497,31 @@ function __init_function_unregister_always() {
     # we return success whatever the cost
     return 0
 }
+#####
+#
+# - __init_results_add
+#
+# - Description
+#   Function gets called by the configuration modules after the configuration of a specific
+#   feature is done. I then stores the information in an associative array which is later
+#   used to print the information via the "print" package.
+#
+#   The associatige array that holds the information is called '__INIT_RESULTS_FEATURES'.
+#   It needs to be created manually. If it is not available, the function just returns
+#   with '0'.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: FEATURENAME - The name of the feature the status is reported for.
+#   - #2 [IN|MANDATORY]: FEATURESTATUS - The status of the feature. Basically a string of your choice.
+#
+# - Return values
+#   - 0 on success/added.
+#   - >0 on failure/problems.
+#
 function __init_results_add() {
+    if ! __aarray_exists __INIT_RESULTS_FEATURES; then
+        return 0
+    fi
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
     else
@@ -505,14 +534,33 @@ function __init_results_add() {
         declare __P_FEATURESTATUS="${@:2:1}"
     fi
 
-    if __aarray_exists __INIT_RESULTS_FEATURES; then
-        __INIT_RESULTS_FEATURES["${__P_FEATURENAME}"]="${__P_FEATURESTATUS}"
-    fi
+    __INIT_RESULTS_FEATURES["${__P_FEATURENAME}"]="${__P_FEATURESTATUS}"
+
     return 0
 }
+#####
+#
+# - __init_results_show
+#
+# - Description
+#   When the associative array '__INIT_RESULTS_FEATURES' exists, this function will display its
+#   contents nicely formatted in a table.
+#
+# - Parameters
+#   - NONE.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
 function __init_results_show() {
+
     if __aarray_exists __INIT_RESULTS_FEATURES; then
+
+        # create the format array
         declare -Agx __G_TABLE_FORMAT_INIT_RESULTS=()
+
+        # set the column name prefix.
         declare __T_CN="COLUMN1"
         __G_TABLE_FORMAT_INIT_RESULTS[${__T_CN}_ALIGN]="l"
         __G_TABLE_FORMAT_INIT_RESULTS[${__T_CN}_HEADER_TEXT]="Feature"
@@ -524,6 +572,7 @@ function __init_results_show() {
         __G_TABLE_FORMAT_INIT_RESULTS[${__T_CN}_DATA_VALUE_DISPLAY_NAME_REGEX_INDEX]=1
         unset __T_CN
 
+        # set the column name prefix.
         declare __T_CN="COLUMN2"
         __G_TABLE_FORMAT_INIT_RESULTS[${__T_CN}_ALIGN]="l"
         __G_TABLE_FORMAT_INIT_RESULTS[${__T_CN}_HEADER_TEXT]="Status"
@@ -531,11 +580,16 @@ function __init_results_show() {
         __G_TABLE_FORMAT_INIT_RESULTS[${__T_CN}_DATA_NAME_REGEX_FORMULA]='^(.+)$'
         __G_TABLE_FORMAT_INIT_RESULTS[${__T_CN}_DATA_NAME_REGEX_MATCH]=1
         unset __T_CN
+
         __log i -- "\n"
         __log_banner i -- "Configuration overview:"
+        # let's dance.
         __print_table __INIT_RESULTS_FEATURES __G_TABLE_FORMAT_INIT_RESULTS 2>&1 | __log_stdin i --
+        return
+    else
+        return 0
     fi
-    return 0
+    return 254
 }
 #####
 #
@@ -545,7 +599,7 @@ function __init_results_show() {
 #   Takes the name of a stage and returns the name of the corresponding array. This function
 #   basically exists for convenience to have a single point where the name gets changed.
 #
-# - Paramters:
+# - Parameters:
 #   - #1 [IN|MANDATORY]: STAGENAME - Name of the stage
 #   - #2 [OUT|OPTIONAL]: RETURN_VALUE - Name of an existing variable that should be filled with the array's name.
 #
@@ -582,7 +636,7 @@ function __init_stage_arrayname_get() {
 # - Description:
 #   Takes the name of a stage and registers to it.
 #
-# - Paramters:
+# - Parameters:
 #   - #1 [IN|MANDATORY]: STAGENAME - Name of the stage
 #
 # - Return values:
@@ -640,7 +694,7 @@ function __init_stage_register() {
 # - Description:
 #   Takes the name of a stage and returns 0 when it's registered.
 #
-# - Paramters:
+# - Parameters:
 #   - #1 [IN|MANDATORY]: STAGENAME - Name of the stage.
 #
 # - Return values:
@@ -675,7 +729,7 @@ function __init_stage_registered() {
 # - Description:
 #   Returns all registered stages. Either to stdout or to the ARRAY you handed it via the out paramter.
 #
-# - Paramters:
+# - Parameters:
 #   - #1 [IN|OPTIONAL]: RETURN_ARRAY - Name of an existing array that should be filled with the stage namees.
 #
 # - Return values:
@@ -723,7 +777,7 @@ function __init_stage_registered_get_all() {
 #   Function names that are found but don't exist anymore in the environment are marked
 #   for deletion from the array and are deleted after all functions ran successfully.
 #
-# - Paramters:
+# - Parameters:
 #   - #1 [IN|MANDATORY]: STAGENAME - Name of the stage.
 #
 function __init_stage_run() {
@@ -833,12 +887,15 @@ function __init_stage_run() {
 #   paramter it will run from the first stage found that is >= STAGEFROM to the end
 #   of all registered stages.
 #
-# - Paramters:
-#   - #1 [IN|MANDATORY]: STAGEFROM - The stage where you want to start from.
-#   - #2 [IN|OPTIONAL]:  STAGETO - The stage where you want to stop
-#                           If omitted, runs from STAGEFROM to the very end.
-#   - #3 [OUT|OPTIONAL]: RETURN_ARRAY - Name of an existing array that should be filled with the
-#                           names of the stages that were run.
+# - Parameters:
+#   - #1 [IN|MANDATORY]: STAGEFROM
+#       The stage where you want to start from.
+#
+#   - #2 [IN|OPTIONAL]:  STAGETO
+#       The stage where you want to stop. If omitted, runs from STAGEFROM to the very end.
+#
+#   - #3 [OUT|OPTIONAL]: RETURN_ARRAY
+#       Name of an existing array that should be filled with the names of the stages that were run.
 #
 # - Return values:
 #   - 0 on success.
@@ -983,7 +1040,7 @@ function __init_stage_unregister() {
 #   Used to register paramters to hand to the main process that will be started in the container
 #   at the end of the init process. Used during the start phase of the image.
 #
-# - Paramter:
+# - Parameters:
 #   - # [IN|MANDATORY] STARTPARAMTERS: One or more paramters to be registered to the init parameters array.
 #
 # - Return values:

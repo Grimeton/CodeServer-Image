@@ -262,12 +262,45 @@ function __file_access() {
     fi
     return 1
 }
+#####
+#
+# - __file_access_su
+#
+# - Description
+#   Takes the name of a user, a mode and a file and tests if given file can be accessed in
+#   given mode by given user by using su. So the script need to run as root, to actually do it.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY]: USER - The user name or ID of said user. The user MUST exist in the system.
+#   - #2 [IN|MANDATORY]: MODE - The mode in which the user should be able to access the file.
+#   - #3 [IN|MANDATORY]: FILE - The full path to the file that should be tested.
+#
+#   - #1 [IN|MANDATORY] USER
+#       The name or the UID of the user to be tested with. As this tool runs "su", the user must exist
+#       independent if it is given the name or the UID.
+#
+#   - #2 [IN|MANDATORY]: MODE
+#       The mode to test for. One can use the following characters/words to represent certain modes:
+#       - READ: 1,r,read
+#       - WRITE: 2,w,write
+#       - EXECUTE: 4,x,execute
+#
+#   - # [IN|MANDATORY]: FILE
+#       The full path to the file to test for. If the path does NOT start with a slash, the function
+#       checks if there is a file available from the current directory and gets its realpath and then
+#       tests against that.
+#
+# - Return values:
+#   - 0 on success.
+#   - 1 on failure.
+#   - >1 on problems.
+#
 function __file_access_su() {
 
-    if ! __user_exists "${@:1:1}"; then
-        return 101
-    else
+    if __user_exists "${@:1:1}"; then
         declare -p __P_USER="${@:1:1}"
+    else
+        return 101
     fi
 
     case "${@:2:1}" in
@@ -300,6 +333,36 @@ function __file_access_su() {
 
 }
 
+#####
+#
+# - __file_permissions_allow
+#
+# - Description
+#   Helper function for __file_access. Takes a digit as needle, a digit or a permissions block as haystack and the position in the 
+#   permissions block to test against.
+#
+# - Parameter
+#   - #1 [IN|MANDATORY]: NEEDLE
+#       The digit of the modes that you want to test for. This digit is composed out of 4,2 and 1. Read chmod's manual to learn more.
+#
+#   - #2 [IN|MANDATORY]: HAYSTACK
+#       The digit of the modes that you want to test in. This can either be a simple digit, like in NEEDLE, or you can hand it a 3 or 4 digit
+#       permission block like "755" or "0755".
+#
+#   - #3 [IN|OPTIONAL]: POSITION
+#       This option is only active if HAYSTACK is actually a block of 3 or 4 digits. You can either use the positions 1 to 3 or 1 to 4,
+#       or you can use the following characters for the position in the permissions block:
+#       - u - User permissions.
+#       - g - Group permissions.
+#       - w - World/other permissions.
+#
+#       The function automatically adjusts to 3 or 4 digit blocks. Also, when using a 4 digit block, you can check against the special bits via position 1 in the block.
+#
+# - Return values
+#   - 0 when the permissions allow access.
+#   - 1 when the permissions do NOT allow access.
+#   - >1 when there was an error along the way.
+#
 function __file_permissions_allow() {
     if [[ "${@:1:1}" =~ ${__FILE_REGEX_PERMISSIONS_DIGIT} ]]; then
         declare -i __P_NEEDLE=${@:1:1}
@@ -351,8 +414,8 @@ function __file_permissions_allow() {
         return 103
     fi
 
-    declare -a __T_NEEDLE_ARRAY=()
-    declare -a __T_HAYSTACK_ARRAY=()
+    declare -A __T_NEEDLE_ARRAY=()
+    declare -A __T_HAYSTACK_ARRAY=()
 
     if __file_permissions_array ${__P_NEEDLE} __T_NEEDLE_ARRAY; then
         true
@@ -366,17 +429,35 @@ function __file_permissions_allow() {
         return 112
     fi
 
-    declare -i __T_CTR=0
-
-    while [[ ${__T_CTR} -lt ${#__T_NEEDLE_ARRAY[@]} ]]; do
-        if [[ ${__T_NEEDLE_ARRAY[${__T_CTR}]} -gt ${__T_HAYSTACK_ARRAY[${__T_CTR}]} ]]; then
+    for __T_KEY in "r" "w" "x"; do
+        if [[ ${__T_NEEDLE_ARRAY[${__T_KEY}]} -gt ${__T_HAYSTACK_ARRAY[${__T_KEY}]} ]]; then
             return 1
         fi
-        ((__T_CTR++)) || true
     done
     return 0
 }
-
+#####
+#
+# - __file_permissions_array
+#
+# - Description
+#   Takes a permission digit, composed of 4,2 and 1 and returns an associative array that contains either
+#   the corresponding value of the digit if set, or 0 if not set. This way, you can either iterate over
+#   the array and add all the values to get the full permission digit again, or check each digit if it
+#   is set or not.
+#
+#   When you have two of those arrays, one with the permissions you need and one with the permissions
+#   you actually got and you find a value in the required array that is bigger than the one in the
+#   existing array, you cannot access the file/directory with the permissions you require.
+#
+# - Parameters
+#   - #1 [IN|MANDATORY] - The permission digit to be stripped apart.
+#   - #2 [OUT|MANDATORY] - The name of an associative array that should be filled with the results.
+#
+# - Return values
+#   - 0 on success.
+#   - >0 on failure.
+#
 function __file_permissions_array() {
     if [[ "${@:1:1}" =~ ${__FILE_REGEX_PERMISSIONS_DIGIT} ]]; then
         declare -i __T_PERM=${@:1:1}
@@ -384,38 +465,27 @@ function __file_permissions_array() {
         return 101
     fi
 
-    if __array_exists "${@:2:1}"; then
+    if __aarray_exists "${@:2:1}"; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
     else
-        declare -a __T_RETURN_VALUE=()
+        return 102
     fi
 
-    __T_RETURN_VALUE=()
+    __T_RETURN_VALUE=([r]=0 [w]=0 [x]=0)
 
     if [[ ${__T_PERM} -gt 3 ]]; then
-        __T_RETURN_VALUE[0]=1
+        __T_RETURN_VALUE[r]=4
         __T_PERM=$((${__T_PERM} - 4))
-    else
-        __T_RETURN_VALUE[0]=0
     fi
 
     if [[ ${__T_PERM} -gt 1 ]]; then
-        __T_RETURN_VALUE[1]=1
+        __T_RETURN_VALUE[w]=2
         __T_PERM=$((${__T_PERM} - 2))
-    else
-        __T_RETURN_VALUE[1]=0
     fi
 
     if [[ ${__T_PERM} -gt 0 ]]; then
-        __T_RETURN_VALUE[2]=1
-    else
-        __T_RETURN_VALUE[2]=0
+        __T_RETURN_VALUE[x]=1
     fi
-
-    if [[ ! -R __T_RETURN_VALUE ]]; then
-        echo "${__T_RETURN_VALUE[@]}"
-    fi
-
     return 0
 
 }
