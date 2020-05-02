@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Table of contents</title>
+        <style>
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </head>
+    <body>
+        <p>CodeServer container based on the latest release from the official <a href="https://github.com/cdr/code-server">CodeServer Github Repository</a>.</p>
+<h1 id="table-of-contents">Table of contents</h1>
+<h1 id="license-and-warning">License and Warning</h1>
+<p>Copyright (c) 2020, <a href="mailto:grimeton@gmx.net">grimeton@gmx.net</a></p>
+<p>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:</p>
+<ol>
+<li>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>
+<li>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the software/distribution.</li>
+<li>If we meet some day, and you think this stuff is worth it, you can buy me a beer in return, Grimeton.</li>
+</ol>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<p>This license affects the image itself. CodeServer, the used distribution and other software inside the image come with their own licenses.</p>
+<h1 id="bugs">BUGS</h1>
+<p>Please report bugs via the <a href="https://github.com/Grimeton/CodeServer-Image/issues">Github Repository</a>.</p>
+<h1 id="provided-architectures-contents-distributions-releases--tags">Provided Architectures, Contents, Distributions, Releases &amp; Tags</h1>
+<h2 id="image-architectures">Image Architectures</h2>
+<p>So far, &quot;amd64&quot; is the only supported architecture. As NodeJS has dropped x86 support, x86 builds are out of the picture at the moment.</p>
+<h2 id="image-contents">Image Contents</h2>
+<p>Each image will contain CodeServer installed in /opt/code-server/.</p>
+<p>The Debian and Ubuntu images use the following additional repositories to make things happen:</p>
+<ul>
+<li><a href="https://github.com/nodesource/distributions">Nodesource's</a> NPM version (Distribution version too old).</li>
+<li><a href="https://classic.yarnpkg.com/en/docs/install/">Yarn</a> from <a href="https://yarnpkg.com">yarnpkg.com</a> (Distribution version too old).</li>
+</ul>
+<p>All images download the following files during the build phase:</p>
+<ul>
+<li><a href="https://github.com/Yelp/dumb-init/releases">Yelp/dumb-init</a></li>
+<li><a href="https://github.com/tianon/gosu/releases">tianon/gosu</a></li>
+</ul>
+<p>Yes, there are distribution packages for those files and there are other/smaller options e.g. su-exec instead of gosu on Alpine Linux. I picked the pre compiled, statically linked versions to have reproducable results and a small footprint.</p>
+<p>Debian 8 and 9 images also use the <a href="https://download.docker.com/linux/debian">Docker Repository</a> to get their hands on a working Docker version. This is mainly on the build image which is used to create the runtime image.</p>
+<h2 id="image-distributions">Image Distributions</h2>
+<p>The images will be the default distribution images. One exception is Debian, where I'm also going to use the &quot;slim&quot; version of their images to provide a release. All images come from the following sources:</p>
+<ul>
+<li><a href="https://hub.docker.com/_/alpine">Alpine</a></li>
+<li><a href="https://hub.docker.com/_/debian">Debian</a></li>
+<li><a href="https://hub.docker.com/_/debian">Debian Slim</a></li>
+<li><a href="https://hub.docker.com/_/ubuntu">Ubuntu</a></li>
+</ul>
+<h2 id="image-release-types">Image Release Types</h2>
+<p>I'm going to provide several image variants with two different releases:</p>
+<ul>
+<li>Latest - This is HEAD of the <a href="https://github.com/cdr/code-server">git repository</a>.</li>
+<li>Latest Release - This is the latest release from the list available <a href="https://github.com/cdr/code-server/releases">here</a></li>
+</ul>
+<h2 id="image-tags">Image Tags</h2>
+<p>The images' tags will be as follows:</p>
+<p>Every image has a tag that consists of the following parts:</p>
+<ul>
+<li>The string &quot;build&quot;</li>
+<li>The build version number, e.g &quot;0.01&quot;. This is an internal number.</li>
+<li>The distribution name in lowercase, e.g. &quot;debian&quot; or &quot;ubuntu&quot;</li>
+<li>The distribution version, e.g. &quot;8&quot; or &quot;18.04&quot;.</li>
+<li>The CodeServer version, e.g. &quot;3.2.0&quot;.</li>
+<li>The Git hash that this CodeServer version was built from, e.g. &quot;fd36a99&quot;</li>
+<li>The string &quot;release&quot; if it is a &quot;Latest Release&quot;.</li>
+</ul>
+<p>You get: &quot;build-0.01-ubuntu-18.04-3.2.0-fd36a99-release&quot;.</p>
+<h2 id="image-tags-short">Image Tags (short)</h2>
+<p>To make it easier, each image also comes with a shorter tag as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Architecture</th>
+<th>Base Image Tag</th>
+<th>Latest (HEAD)</th>
+<th>Latest Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine 3.10</td>
+<td>amd64</td>
+<td>alpine:3.10</td>
+<td>alpine-3.10-latest</td>
+<td>alpine-3.10-latest-release</td>
+</tr>
+<tr>
+<td>Alpine 3.11</td>
+<td>amd64</td>
+<td>alpine:3.11</td>
+<td>alpine-3.11-latest</td>
+<td>alpine-3.11-latest-release</td>
+</tr>
+<tr>
+<td>Debian 8</td>
+<td>amd64</td>
+<td>debian:8</td>
+<td>debian-8-latest</td>
+<td>debian-8-latest-release</td>
+</tr>
+<tr>
+<td>Debian 9</td>
+<td>amd64</td>
+<td>debian:9</td>
+<td>debian-9-latest</td>
+<td>debian-9-latest-release</td>
+</tr>
+<tr>
+<td>Debian 10</td>
+<td>amd64</td>
+<td>debian:10</td>
+<td>debian-10-latest</td>
+<td>debian-10-latest-release</td>
+</tr>
+<tr>
+<td>Debian Sid*</td>
+<td>amd64</td>
+<td>debian:sid</td>
+<td>debian-0-latest</td>
+<td>debian-0-latest-release</td>
+</tr>
+<tr>
+<td>Debian 8-slim</td>
+<td>amd64</td>
+<td>debian:8-slim</td>
+<td>debian-8-slim-latest</td>
+<td>debian-8-slim-latest-release</td>
+</tr>
+<tr>
+<td>Debian 9-slim</td>
+<td>amd64</td>
+<td>debian:9-slim</td>
+<td>debian-9-slim-latest</td>
+<td>debian-9-slim-latest-release</td>
+</tr>
+<tr>
+<td>Debian 10-slim</td>
+<td>amd64</td>
+<td>debian:10-slim</td>
+<td>debian-10-slim-latest</td>
+<td>debian-10-slim-latest-release</td>
+</tr>
+<tr>
+<td>Debian Sid-slim*</td>
+<td>amd64</td>
+<td>debian:sid-slim</td>
+<td>debian-0-slim-latest</td>
+<td>debian-0-slim-latest-release</td>
+</tr>
+<tr>
+<td>Ubuntu 16.04</td>
+<td>amd64</td>
+<td>ubuntu:16.04</td>
+<td>ubuntu-16.04-latest</td>
+<td>ubuntu-16.04-latest-release</td>
+</tr>
+<tr>
+<td>Ubuntu 18.04</td>
+<td>amd64</td>
+<td>ubuntu:18.04</td>
+<td>ubuntu-18.04-latest</td>
+<td>ubuntu-18.04-latest-release</td>
+</tr>
+<tr>
+<td>Ubuntu 19.10</td>
+<td>amd64</td>
+<td>ubuntu:19.10</td>
+<td>ubuntu-19.10-latest</td>
+<td>ubuntu-19.10-latest-release</td>
+</tr>
+<tr>
+<td>Ubuntu 20.04</td>
+<td>amd64</td>
+<td>ubuntu:20.04</td>
+<td>ubuntu-20.04-latest</td>
+<td>ubuntu-20.04-latest-release</td>
+</tr>
+</tbody>
+</table>
+<p>'*' 'Debian/Sid' is not marked with a version number anywhere, so I picked '0' as version number. To use the 'Debian/Sid' images use the 'debian-0' prefix and remember: (S)id (I)s (D)angerous!</p>
+<h1 id="quick-start">Quick Start</h1>
+<p>This is a 'docker-compose.yaml'-file that should get you started quickly. All environment variables, visible in the 'docker-compose.yaml'-file are explained below.</p>
+<pre><code class="language-yaml"><div><span class="hljs-attr">version:</span> <span class="hljs-string">"2"</span>
+<span class="hljs-attr">networks:</span>
+<span class="hljs-attr">    tools:</span>
+<span class="hljs-attr">        external:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">services:</span>
+<span class="hljs-attr">        codeserver-ubuntu-1804:</span>
+<span class="hljs-attr">                image:</span> <span class="hljs-string">grimages/codeserver:ubuntu-18.04-latest</span>
+<span class="hljs-attr">                container_name:</span> <span class="hljs-string">codeserver-ubuntu-1804</span>
+<span class="hljs-attr">                environment:</span>
+                        <span class="hljs-comment">## CS_DE<span class="hljs-doctag">BUG:</span> ""</span>
+                        <span class="hljs-comment">## CS_ENABLE_SSH: ""</span>
+                        <span class="hljs-comment">## CS_ENABLE_SSH_HOST_KEY: ""</span>
+                        <span class="hljs-comment">## CS_ENABLE_TELEMETRY: ""</span>
+                        <span class="hljs-comment">## CS_ENABLE_UPDATES: ""</span>
+                        <span class="hljs-comment">## CS_ENABLE_WHEEL: ""</span>
+                        <span class="hljs-comment"># PUT GID HERE TO MATCH OUTER GID</span>
+<span class="hljs-attr">                        CS_GID:</span> <span class="hljs-number">1234</span>
+                        <span class="hljs-comment">## CS_GROUP: ""</span>
+<span class="hljs-attr">                        CS_INSTALL_ADDITIONAL_PACKAGES:</span> <span class="hljs-string">"git"</span>
+                        <span class="hljs-comment">## CS_INSTALL_DOCKER: ""</span>
+                        <span class="hljs-comment">## CS_INSTALL_MICROSOFT_DOTNET_SDK: ""</span>
+                        <span class="hljs-comment">## CS_INSTALL_MICROSOFT_POWERSHELL: ""</span>
+                        <span class="hljs-comment">## CS_INSTALL_MICROSOFT_PACKAGELISTS: ""</span>
+                        <span class="hljs-comment">## CS_LISTEN_HOST: "0.0.0.0"</span>
+<span class="hljs-attr">                        CS_LISTEN_HOST:</span> <span class="hljs-string">"0.0.0.0"</span>
+<span class="hljs-attr">                        CS_LISTEN_PORT:</span> <span class="hljs-string">"8080"</span>
+                        <span class="hljs-comment">## CS_LISTEN_PORT: ""</span>
+                        <span class="hljs-comment">## CS_LISTEN_SOCKET: ""</span>
+                        <span class="hljs-comment">## CS_LISTEN_SOCKET_MODE: ""</span>
+                        <span class="hljs-comment">## CS_LISTEN_SOCKET_OWNER: ""</span>
+                        <span class="hljs-comment">## CS_LISTEN_SOCKET_GROUP: ""</span>
+                        <span class="hljs-comment">## CS_MICROSOFT_PACKAGELISTS_FILENAME: ""</span>
+                        <span class="hljs-comment">## CS_MICROSOFT_PACKAGELISTS_LOCATION: "https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb"</span>
+                        <span class="hljs-comment">## CS_MICROSOFT_PACKAGELISTS_REPOSITORY: ""</span>
+<span class="hljs-attr">                        CS_LOCALES:</span> <span class="hljs-string">"de_DE.UTF-8 en_US.UTF-8"</span>
+                        <span class="hljs-comment">## CS_LOCALES_PACKAGES: ""</span>
+                        <span class="hljs-comment">## CS_PROXY_DOMAIN: ""</span>
+<span class="hljs-attr">                        CS_TIMEZONE:</span> <span class="hljs-string">"Europe/Berlin"</span>
+                        <span class="hljs-comment"># PUT YOUR UID HERE TO MATCH OUTER UID!</span>
+<span class="hljs-attr">                        CS_UID:</span> <span class="hljs-number">1234</span>
+                        <span class="hljs-comment">## CS_UNMINIMIZE_IMAGE: ""</span>
+                        <span class="hljs-comment">## CS_USER: ""</span>
+                        <span class="hljs-comment">## CS_USER_DATA_DIR: ""</span>
+                        <span class="hljs-comment">## CS_USER_EXTENSIONS_DIR: ""</span>
+                        <span class="hljs-comment">## CS_USER_HOME: ""</span>
+                        <span class="hljs-comment">## CS_USER_HOME_ENFORCE_OWNER: ""</span>
+                        <span class="hljs-comment">## CS_USER_PATH: ""</span>
+                        <span class="hljs-comment">## CS_USER_SHELL: ""</span>
+                        <span class="hljs-comment">## CS_VERBOSE: 1</span>
+<span class="hljs-attr">                        CS_WEB_AUTH:</span> <span class="hljs-string">".sup3rs3cr3t"</span>
+                        <span class="hljs-comment">## CS_WEBSSL_CERT: ""</span>
+                        <span class="hljs-comment">## CS_WEBSSL_KEY: ""</span>
+<span class="hljs-attr">                networks:</span>
+<span class="hljs-attr">                        tools:</span>
+<span class="hljs-attr">                                ipv4_address:</span> <span class="hljs-number">1.2</span><span class="hljs-number">.3</span><span class="hljs-number">.4</span>
+<span class="hljs-attr">                restart:</span> <span class="hljs-string">unless-stopped</span>
+<span class="hljs-attr">                volumes:</span>
+<span class="hljs-bullet">                        -</span> <span class="hljs-string">/somewhere/codeserver/config:/config</span>
+<span class="hljs-bullet">                        -</span> <span class="hljs-string">/somewhere/codeserver/data:/data</span>
+</div></code></pre>
+<h1 id="volumes">Volumes</h1>
+<p>Each image comes with two volumes.</p>
+<h2 id="config">/config</h2>
+<p>This volume represents configuration settings and can be used to store SSL/TLS certificates/keys or SSH host keys and stuff.</p>
+<h2 id="data">/data</h2>
+<p>This is usually the user's home directory and contains all the data you're working with. Make sure it's stored in a safe place.</p>
+<h1 id="environment-variables">Environment Variables</h1>
+<p>The image comes with a lot of moving parts that can be configured via environment variables. Usually the rules say to create a small and fast image, however when working with a development environment, version control and several add-ons, these rules don't apply anymore.</p>
+<p>This lead to the following environment variables that can be used to control a lot of settings, including installation of additional packages, repositories and other stuff during the first boot.</p>
+<p>But be careful! Traps are everywhere. One may be the fact that a lot of these variables depend on eachother. You can't just change the user's home directory without expecting it to have an effect on all the other subdirectories that are usually part of the user's home.</p>
+<h2 id="default-values">Default values</h2>
+<p>When an environment variable is not set, or it's content is empty, e.g. VAR=&quot;&quot;, then the default behaviour will be applied.</p>
+<h2 id="boolean-values">Boolean values</h2>
+<h3 id="true">- True</h3>
+<p>The following values will be recognized as being &quot;true&quot;:</p>
+<ul>
+<li>1</li>
+<li>enabled</li>
+<li>true</li>
+<li>yes</li>
+</ul>
+<h3 id="false">- False</h3>
+<p>The following values will be recognized as being &quot;false&quot;:</p>
+<ul>
+<li>0</li>
+<li>disabled</li>
+<li>false</li>
+<li>no</li>
+<li>none</li>
+</ul>
+<h3 id="packagename">- [PACKAGENAME]</h3>
+<p>Some variables will allow to hold a specific package name/version instead of the true value. This is useful to specify the version of a package to be installed without having to use another variable. If the Package which is put into the variable does not exist, it will produce an error message (Garbage In-&gt;Garbage Out).</p>
+<p>Variables that support this features will be marked.</p>
+<h2 id="string-values">String values</h2>
+<p>Some variables can hold strings, e.g. CS_INSTALL_ADDITIONAL_PACKAGES can contain a string of multiple package names separated by space, that should be installed during the first container initialization. One must use a single string with space separated package names, arrays are not supported.</p>
+<h1 id="list-of-variables">List of Variables</h1>
+<h2 id="csdebug">CS_DEBUG</h2>
+<h3 id="description">Description</h3>
+<p>As the name suggests, this variable is used to enable the debug feature of the init script system.</p>
+<h3 id="type">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default">Default</h3>
+<p>Off</p>
+<h2 id="csenablessh">- CS_ENABLE_SSH</h2>
+<h3 id="description-1">Description</h3>
+<p>Is used to enable the built-in SSH server of CodeServer.</p>
+<h3 id="type-1">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-1">Default</h3>
+<p>Off</p>
+<h2 id="csenablesshkey">- CS_ENABLE_SSH_KEY</h2>
+<h3 id="description-2">Description</h3>
+<p>Is used to hand CodeServer the path to a host key file for the built-in SSH server. You can place the file in the '/config' volume and then hand CodeServer the path to it here.</p>
+<h3 id="type-2">Type</h3>
+<p>String - When it contains a valid file, the feature is enabled.</p>
+<h3 id="default-2">Default</h3>
+<p>Empty</p>
+<h2 id="csenabletelemetry">- CS_ENABLE_TELEMETRY</h2>
+<h3 id="description-3">Description</h3>
+<p>Used to enable CodeServer's built-in telemetry option. When not set, telemetry is disabled by default.</p>
+<h3 id="type-3">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-3">Default</h3>
+<p>Off</p>
+<h2 id="csenableupdates">- CS_ENABLE_UPDATES</h2>
+<h3 id="description-4">Description</h3>
+<p>When set, CodeServer tries to detect and download new updates. Should be disabled inside the container for obvious reasons.</p>
+<h3 id="type-4">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-4">Default</h3>
+<p>Off</p>
+<h2 id="csenablewheel">- CS_ENABLE_WHEEL</h2>
+<h3 id="description-5">Description</h3>
+<p>While a lot of people prefer &quot;sudo&quot; nowadays, I prefer &quot;su&quot;. Old habbits die hard I guess. When enabled, adds the group &quot;wheel&quot; and edits /etc/pam.d/su to allow members of the group &quot;wheel&quot; to become root without entering a password.</p>
+<p>So far this only works on Debian and Ubuntu based images.</p>
+<h3 id="type-5">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-5">Default</h3>
+<p>Enabled</p>
+<h2 id="csinstalladditionalpackages">- CS_INSTALL_ADDITIONAL_PACKAGES</h2>
+<h3 id="description-6">Description</h3>
+<p>Can hold multiple package names separated by a space. These packages will be installed on the first boot of the container via the distribution's package management.</p>
+<h3 id="type-6">Type</h3>
+<p>String - Accepts multiple package names, space separated.</p>
+<h3 id="default-6">Default</h3>
+<p>Empty/Disabled.</p>
+<h2 id="csinstalldocker">- CS_INSTALL_DOCKER</h2>
+<h3 id="description-7">Description</h3>
+<p>When enabled, installs the distribution's docker package. This comes in handy when you use CodeServer together wtih a Docker extenension.</p>
+<p>When enabled the following things are going to happen:</p>
+<ul>
+<li>Checks if socket is available at 'CS_INSTALL_DOCKER_SOCKET' and remembers its GID.</li>
+<li>Checks if the group &quot;docker&quot; already exists. If not, creates the group with the GID of the socket found at 'CS_INSTALL_DOCKER_SOCKET'.</li>
+<li>Installs the necessary distribution packages to make docker work inside the container.</li>
+<li>Adds CodeServer's user to the docker group, to make docker usable as non-root user directly from CodeServer.</li>
+</ul>
+<h3 id="type-7">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-7">Default</h3>
+<p>Empty/Disabled.</p>
+<h3 id="packages">Packages</h3>
+<p>The following packages will be installed when the option is enabled:</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Packages</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine</td>
+<td>3.10</td>
+<td>docker-cli</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Alpine</td>
+<td>3.11</td>
+<td>docker-cli</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>docker-ce</td>
+<td>Docker Repository for Debian</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>docker-ce-cli</td>
+<td>Docker Repository for Debian</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>docker docker-compose</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>docker docker-compose</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td><a href="http://docker.io">docker.io</a> docker-compose</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td><a href="http://docker.io">docker.io</a> docker-compose</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td><a href="http://docker.io">docker.io</a> docker-compose</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td><a href="http://docker.io">docker.io</a> docker-compose</td>
+<td>Default</td>
+</tr>
+</tbody>
+</table>
+<h2 id="csinstalldockersocket">- CS_INSTALL_DOCKER_SOCKET</h2>
+<h3 id="description-8">Description</h3>
+<p>The socket that should be used to connect to docker. You have to mount the socket to the inside of the container at the location that you specify via this environment variable. The default is '/var/run/docker.sock', which is used when the variable is not set or empty.</p>
+<h3 id="type-8">Type</h3>
+<p>String - Accepts full path to the docker socket INSIDE of the container.</p>
+<h3 id="default-8">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csfoobar">- CS_FOO_BAR</h2>
+<h3 id="description-9">Description</h3>
+<p>Some bla some ble</p>
+<h2 id="csinstallmicrosoftdotnetsdk">- CS_INSTALL_MICROSOFT_DOTNET_SDK</h2>
+<h3 id="description-10">Description</h3>
+<p>When enabled, the init system will try to fetch and install Microsoft's dotNET SDK from the official <a href="https://packages.microsoft.com">Microsoft Repository</a>. This only works on supported distributions.</p>
+<p>When set to &quot;True&quot;, then the default version of Microsoft's dotNET SDK will be installed, which is 3.1 at the time of writing.</p>
+<p>When set to &quot;False&quot;, nothing will be done.</p>
+<p>When the variable contains a package name, then the package suggested in the variable will be installed, IF IT EXISTS. If it doesn't exist, the system reverts back to the default package, which again is dotnet-sdk-3.1 at the time of writing.</p>
+<h3 id="type-9">Type</h3>
+<p>Boolean WITH PACKAGENAME - Accepts &quot;True&quot;-, &quot;False&quot;-values as well as a package name to install.</p>
+<h3 id="default-9">Default</h3>
+<p>Empty/Off</p>
+<h3 id="packages-1">Packages</h3>
+<p>Installs either the default or the suggested package and its dependencies.</p>
+<h3 id="repositories">Repositories</h3>
+<p>Installs the Microsoft Package Repository available at <a href="https://packages.microsoft.com">https://packages.microsoft.com</a>.</p>
+<h3 id="supported-distributions">Supported Distributions</h3>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Supported</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine</td>
+<td>3.10</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Alpine</td>
+<td>3.11</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h2 id="csinstallmicrosoftpowershell">- CS_INSTALL_MICROSOFT_POWERSHELL</h2>
+<h3 id="description-11">Description</h3>
+<p>When enabled the init system will try to fetch the current version of Powershell from the official <a href="https://packages.microsoft.com">Microsoft Repository</a>. Only works on supported Distributions and pulls in CS_INSTALL_MICROSOFT_PACKAGELISTS.</p>
+<h3 id="type-10">Type</h3>
+<p>Boolean WITH [PACKAGENAME]- Accepts &quot;True&quot;-, &quot;False&quot;-values as well as a package name to install.</p>
+<h3 id="default-10">Default</h3>
+<p>Empty/Off</p>
+<h3 id="packages-2">Packages</h3>
+<p>Installs either the default or the suggested package and its dependencies.</p>
+<h3 id="repositories-1">Repositories</h3>
+<p>Installs the Microsoft Package Repository available at <a href="https://packages.microsoft.com">https://packages.microsoft.com</a>.</p>
+<h3 id="supported-distributions-1">Supported Distributions</h3>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Supported</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine</td>
+<td>3.10</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Alpine</td>
+<td>3.11</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>In case of Ubuntu only LTS releases are supported with a Powershell package. If you have a non-LTS version or a newer version as the current, official LTS, then you need to use a Snapcraft image of <a href="https://snapcraft.io/powershell">Powershell</a>. Sadly this is total overkill inside a container and requires so many changes to container security that it becomes completely pointless to use.</p>
+<p>If you want to use this container with <a href="https://snapcraft.io/store">Snapcraft Images</a> you can, but you have to change the following things:</p>
+<ul>
+<li>Install systemd inside the image.</li>
+<li>Change entry point to start image's systemd.</li>
+<li>Follow the additional information at <a href="https://github.com/ogra1/snapd-docker">ogra1/snapd-docker</a>.</li>
+</ul>
+<p>What do the SuSE people usually say? Have a lot of fun?</p>
+<h2 id="csinstallmicrosoftpackagelists">- CS_INSTALL_MICROSOFT_PACKAGELISTS</h2>
+<h3 id="description-12">Description</h3>
+<p>When enabled, installs the official <a href="https://packages.microsoft.com">Microsoft Repository</a> on supported systems.</p>
+<p>Have an eye on the &quot;CS_MICROSOFT_*&quot; options explained below!</p>
+<h3 id="type-11">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False-values.</p>
+<h3 id="default-11">Default</h3>
+<p>Off/Empty</p>
+<h3 id="packages-3">Packages</h3>
+<p>When enabled, installs the following packages:</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Packages</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td>apt-transport-https ca-certificates curl gnupg2</td>
+<td>Default</td>
+</tr>
+</tbody>
+</table>
+<h3 id="repositories-2">Repositories</h3>
+<p>Installs Microsoft's official repository.</p>
+<h3 id="supported-distributions-2">Supported Distributions</h3>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Supported</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine</td>
+<td>3.10</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Alpine</td>
+<td>3.11</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cslistenhost">- CS_LISTEN_HOST</h2>
+<h3 id="description-13">Description</h3>
+<p>The address CodeServer listen's on for incoming web requests. This should usually be either &quot;0.0.0.0&quot; or &quot;[::]&quot; or a more specific IP-address where the web server should listen on.</p>
+<p><strong>Read the description of CS_LISTEN_SOCKET!</strong></p>
+<h3 id="type-12">Type</h3>
+<p>String - Accepts IP-addresses.</p>
+<h3 id="default-12">Default</h3>
+<p>Empty/Not set</p>
+<h2 id="cslistenport">- CS_LISTEN_PORT</h2>
+<h3 id="description-14">Description</h3>
+<p>The port CodeServer's web server is listening on for web requests. As CodeServer is not running as root, one should pick a port in the range between greater or equal to 1024 and less or equal to 65536. Yes. 65536. There is no such thing as port 0. Ports are counted from 1 up. Port 0 represents a special case that turns into any random, available port on the system.</p>
+<p>Linux' <a href="https://github.com/torvalds/linux/blob/master/net/ipv4/inet_connection_sock.c">/net/ipv4/inet_connection_sock.c</a> says about this:</p>
+<pre><code class="language-c"><div><span class="hljs-comment">/* Obtain a reference to a local port for the given sock,
+ * if snum is zero it means select any available local port.
+ * We try to allocate an odd port (and leave even ports for connect())
+ */</span>
+ <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">inet_csk_get_port</span><span class="hljs-params">(struct sock *sk, <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">short</span> snum)</span>
+</span></div></code></pre>
+<p><strong>Read the description of CS_LISTEN_SOCKET!</strong></p>
+<h3 id="type-13">Type</h3>
+<p>String/Integer - Accepts any number between 1024 and 65536.</p>
+<h3 id="default-13">Default</h3>
+<p>Empty/Not set</p>
+<h2 id="cslistensocket">- CS_LISTEN_SOCKET</h2>
+<h3 id="description-15">Description</h3>
+<p>When set, contains the full path to a location where a UNIX socket should be created. If there is already a socket said location, the init script tries to remove it and free the location for CodeServer.</p>
+<p><strong>WHEN THIS OPTION IS SET 'CS_LISTEN_HOST' AND 'CS_LISTEN_PORT' ARE IGNORED AND THE SERVER WILL ONLY LISTEN ON THE UNIX SOCKET!</strong></p>
+<p>Also check the documentation on:</p>
+<ul>
+<li>CS_LISTEN_SOCKET_MODE</li>
+<li>CS_LISTEN_SOCKET_OWNER</li>
+<li>CS_LISTEN_SOCKET_GROUP</li>
+</ul>
+<p>below.</p>
+<h3 id="type-14">Type</h3>
+<p>String - Accepts full path to location where to create new UNIX socket.</p>
+<h3 id="default-14">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="cslistensocketmode">- CS_LISTEN_SOCKET_MODE</h2>
+<h3 id="description-16">Description</h3>
+<p>This can contain a mode mask either with 3 digits (Owner, Group, World) or 4 digits (Special Bits, Owner, Group, World) and can be used to restrict access to the socket accross container boundaries.</p>
+<h3 id="type-15">Type</h3>
+<p>String - Accepts 3 or 4 digit mode mask for the socket.</p>
+<h3 id="default-15">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="cslistensocketowner">- CS_LISTEN_SOCKET_OWNER</h2>
+<h3 id="description-17">Description</h3>
+<p>Should contain the owner of the future socket. One can use names as well as IDs here. Usually the wiser choise is to use ID only to get access rights set accross container boundaries.</p>
+<p>When using a name, the name must exist in /etc/passwd to be accepted while an ID is always accepted.</p>
+<h3 id="type-16">Type</h3>
+<p>String - Accepts owner name or ID of future socket.</p>
+<h3 id="default-16">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="cslistensocketgroup">- CS_LISTEN_SOCKET_GROUP</h2>
+<h3 id="description-18">Description</h3>
+<p>Same as CS_LISTEN_SOCKET_OWNER, just for the group. Accepts name or GID. The name MUST EXIST in the passwd database, while a GID is always accepted and used.</p>
+<h3 id="type-17">Type</h3>
+<p>String - Accepts group name or GID of future socket.</p>
+<h3 id="default-17">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="cswebauth">- CS_WEB_AUTH</h2>
+<h3 id="description-19">Description</h3>
+<p>Used to control the password authentication feature of CodeServer's web server. If not set or empty, then password authentication is disabled. As soon as it is set and contains a value, the value will be used as password and the authentication method will be changed from &quot;none&quot; to &quot;password&quot; in CodeServer.</p>
+<h3 id="type-18">Type</h3>
+<p>String - Accepts any string as password for HTTP authentication at CodeServer's web server.</p>
+<h3 id="default-18">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="cswebsslcert--cswebsslkey">- CS_WEBSSL_CERT &amp; CS_WEBSSL_KEY</h2>
+<h3 id="description-20">Description</h3>
+<p>Both variables are used to configure the web server's SSL/TLS settings. The whole configuration follows a certain logic, which is as follows:</p>
+<ul>
+<li>CS_WEBSSL_CERT is not set or empty - SSL/TLS is disabled.</li>
+<li>CS_WEBSSL_CERT is not a file or the file it points to cannot be accessed by the user running CodeServer - Auto generated certificate/key pair will be used.</li>
+<li>CS_WEBSSL_KEY is not set, empty, not a file or not accessible by the user running CodeServer - Auto generated certificate/key pair will be used.</li>
+</ul>
+<p>So to have no encryption at all, just don't set the variables. If you want to use the auto generated certificates on the other hand, just set 'CS_WEBSSL_CERT' to something that is invalid, like '/dev/null' and watch the auto generation get triggered.</p>
+<p>To use a custom certificate/key pair put them into the '/config' volume and then hand the paths to CodeServer via the variables like so:</p>
+<ul>
+<li>CS_WEBSSL_CERT='/config/codeserver.cer'</li>
+<li>CS_WEBSSL_KEY='/config/codeserver.key'</li>
+</ul>
+<p>When the init scripts are able to find the files and fix the permissions, in case necessary, then the certificate/key combination will be used at the start of CodeServer.</p>
+<h2 id="csmicrosoftpackagelistsfilename">- CS_MICROSOFT_PACKAGELISTS_FILENAME</h2>
+<h3 id="description-21">Description</h3>
+<p>Providing a full path to a file, or just a filename of a file that will be added as &quot;file to be downloaded&quot; when trying to install the Microsoft Package Repository.</p>
+<h3 id="type-19">Type</h3>
+<p>String - Accepts full path to a faile or just a filename.</p>
+<h3 id="default-19">Default</h3>
+<p>Empty/Not set.</p>
+<h3 id="supported-distributions-3">Supported Distributions</h3>
+<p>Check 'CS_INSTALL_MICROSOFT_PACKAGELISTS' for a list of supported distributions.</p>
+<h2 id="csmicrosoftpackagelistslocation">- CS_MICROSOFT_PACKAGELISTS_LOCATION</h2>
+<h3 id="description-22">Description</h3>
+<p>Providing a full path to a file, or a full URL to a location that should be downloaded and then installed to make the Microsoft Package Repository available to the package manager of the container image.</p>
+<p>This is the only option that disables the auto detection/auto generation of Microsoft Package Repository URLs.</p>
+<h3 id="type-20">Type</h3>
+<p>String - Accepts full path to a file or full URL to a location that is to be downloaded.</p>
+<h3 id="default-20">Default</h3>
+<p>Empty/Not set.</p>
+<h3 id="supported-distributions-4">Supported Distributions</h3>
+<p>Check 'CS_INSTALL_MICROSOFT_PACKAGELISTS' for a list of supported distributions.</p>
+<h2 id="csmicrosoftpackagelistsrepository">- CS_MICROSOFT_PACKAGELISTS_REPOSITORY</h2>
+<h3 id="description-23">Description</h3>
+<p>The type of the repository to be installed. Microsoft offers multiple repository types and installation variants of these repository types.</p>
+<h3 id="type-21">Type</h3>
+<p>String - Accepts any repository_type:install_type combination</p>
+<h3 id="default-21">Default</h3>
+<p>Empty/Not set.</p>
+<h3 id="available-repositoryinstallation-type-combinations">Available repository/installation type combinations.</h3>
+<p>Currently there are three different repository types:</p>
+<ul>
+<li>Production</li>
+<li>Insiders fast</li>
+<li>Insiders slow</li>
+</ul>
+<p>which come either in distribution package format (deb) or as source (list with keys).</p>
+<p>When using the default type &quot;pkg&quot; and the system is not able to install the repository, it falls back to the source version with additional key installation and tries again. If you do NOT want this, you can enforce using &quot;pkg&quot; only by prepending an &quot;f&quot; to the installation type. &quot;pkg&quot; becomes &quot;fpkg&quot;.</p>
+<p>The package's installation types and their tags:</p>
+<table>
+<thead>
+<tr>
+<th>Repository type</th>
+<th>Repository Prefix</th>
+<th>Package</th>
+<th>Enforce Package Only</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Production</td>
+<td>prod</td>
+<td>pkg</td>
+<td>fpkg</td>
+<td>source</td>
+</tr>
+<tr>
+<td>Insiders Slow</td>
+<td>islow</td>
+<td>pkg</td>
+<td>fpkg</td>
+<td>source</td>
+</tr>
+<tr>
+<td>Insiders Fast</td>
+<td>ifast</td>
+<td>pkg</td>
+<td>fpkg</td>
+<td>source</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supported-distributions-5">Supported Distributions</h3>
+<p>Check 'CS_INSTALL_MICROSOFT_PACKAGELISTS' for a list of supported distributions.</p>
+<h2 id="cslocales">- CS_LOCALES</h2>
+<h3 id="description-24">Description</h3>
+<p>Can hold one ore more locale names separated by space. When set, the first locale becomes the default while all locales in the string are installed.</p>
+<h3 id="type-22">Type</h3>
+<p>String - Accepts one ore more locales separated by spaces.</p>
+<h3 id="default-22">Default</h3>
+<p>Empty/Not Set</p>
+<h3 id="packages-4">Packages</h3>
+<p>When enabled, pulls in a package that contains the locale data so that locales can be generated and configured. This is not directly supported on Alpine Linux as musl libc's locale implementation is non existant. One can install glibc but that's beyond the scope of the setup script.</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Packages</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine</td>
+<td>3.10</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Alpine</td>
+<td>3.11</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td>locales</td>
+<td>Default</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cslocalespackages">- CS_LOCALES_PACKAGES</h2>
+<h3 id="description-25">Description</h3>
+<p>Can hold one or multiple package names separated by space, that should be installed when 'CS_LOCALES' contains locale names that are to be installed.</p>
+<h3 id="type-23">Type</h3>
+<p>String - Accepts one or more package names separated by space.</p>
+<h3 id="default-23">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csproxydomain">- CS_PROXY_DOMAIN</h2>
+<h3 id="description-26">Description</h3>
+<p>Can hold one or more proxy domain definitions to be used by CodeServer. When using multiple definitions separate them by space.</p>
+<h3 id="type-24">Type</h3>
+<p>String - Accepts one or multiple proxy domain definitions, separated by space.</p>
+<h3 id="default-24">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="cstimezone">- CS_TIMEZONE</h2>
+<h3 id="description-27">Description</h3>
+<p>Contains the name of the timezone that should become system default. Usually this is a relativ path that can be matched against the prefix &quot;/usr/share/zoneinfo/&quot;.</p>
+<p>When the timezone is set, then the link in '/etc/localtime' is changed, as well as '/etc/timezone', which is modified to reflect the new timezone configuration.</p>
+<h3 id="type-25">Type</h3>
+<p>String - Accepts path that points to valid timezone.</p>
+<h3 id="default-25">Default</h3>
+<p>Empty/Not set.</p>
+<h3 id="packages-5">Packages</h3>
+<p>When activated it installs the following packages:</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Packages</th>
+<th>Repositories</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine</td>
+<td>3.10</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Alpine</td>
+<td>3.11</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td>tzdata</td>
+<td>Default</td>
+</tr>
+</tbody>
+</table>
+<h2 id="csunminimizeimage">- CS_UNMINIMIZE_IMAGE</h2>
+<h3 id="description-28">Description</h3>
+<p>Container images are usually coming in a minimized, condensed format missing a lot of features like manual pages, documenation and other things. Usually this is a good thing, as it save space and makes the image smaller. When running a development environment inside an image, this can become a bad choice, as one can't just access a manual page or some documentation in '/usr/share/doc' anymore.</p>
+<p>Ubuntu adds filters to filter out these things at installation time, so they are not going to be installed in the first place.</p>
+<p>To revert this action and install all the missing information into the image again, this option can be enabled. This is a lengthy process that can take a couple of minutes, so be patient!</p>
+<h3 id="type-26">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-26">Default</h3>
+<p>Empty/Not set.</p>
+<h3 id="supported-distributions-6">Supported Distributions</h3>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+<th>Supported</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpine</td>
+<td>3.10</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Alpine</td>
+<td>3.11</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>8</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>9</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>10</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>0/Sid</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>16.04</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>18.04</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>19.10</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>20.04</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="csuserdatadir">- CS_USER_DATA_DIR</h2>
+<h3 id="description-29">Description</h3>
+<p>When set hands the value to CodeServer's '--user-data-dir' option.</p>
+<p>Usually this is a subfolder of the user's HOME directory. To make it possible to change just the subfolder, this variable works as follows:</p>
+<ul>
+<li>The path starts with a '/' - The path is considered a full path starting at the system's root '/' and will be set to '${CS_USER_DATA_DIR}'.</li>
+<li>The path starts NOT with a '/' - The path is considered a subfolder of the user's '${HOME}' and will be set to '${HOME}/${CS_USER_DATA_DIR}'.</li>
+</ul>
+<h3 id="type-27">Type</h3>
+<p>String - Accepts a full or relative path to a new location where the user data directory should reside.</p>
+<h3 id="default-27">Default</h3>
+<p>Empty/Not Set.</p>
+<h2 id="csuserextensionsdir">- CS_USER_EXTENSIONS_DIR</h2>
+<h3 id="description-30">Description</h3>
+<p>When set hands its value to CodeServer's '--extensions-dir' which changes the location of said directory.</p>
+<p>As this is usually a subfolder of the user's '${HOME}', this variable works as follows:</p>
+<ul>
+<li>The value starts with a '/' - The path is considered a full path starting at the system's root '/' and will be set to '${CS_USER_EXTENSIONS_DIR}'.</li>
+<li>The value does NOT start with a '/' - The path is considered a sub directory of the user's '${HOME}' and will be set to '${HOME}/${CS_USER_EXTENSIONS_DIR}'.</li>
+</ul>
+<h3 id="type-28">Type</h3>
+<p>String - Accepting either a full or a relativ path to the new location of CodeServer's &quot;extensions directory&quot;.</p>
+<h3 id="default-28">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csuserpath">- CS_USER_PATH</h2>
+<h3 id="description-31">Description</h3>
+<p>Contains the path to CodeServer's &quot;path&quot; option, the last option that is handed to CodeServer when starting it. The option is only positional and does not have a parameter name.</p>
+<p>As this is usually a subfolder of the user's '${HOME}', this variable works as follows:</p>
+<ul>
+<li>The value starts with a '/' - The path is considered a full path starting at the system's root '/' and will be set to '${CS_USER_PATH}'.</li>
+<li>The value does NOT start with a '/' - The path is considered a sub directory of the user's '${HOME}' and will be set to '${HOME}/${CS_USER_PATH}'.</li>
+</ul>
+<h3 id="type-29">Type</h3>
+<p>String - Accepting either a full or relative path to the new location of CodeServer's &quot;path&quot; option.</p>
+<h3 id="default-29">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csgid">- CS_GID</h2>
+<h3 id="description-32">Description</h3>
+<p>The GID of the future primary group of the future user that will be created to run CodeServer. Use this to match any external GID on the host or on network drives.</p>
+<h3 id="type-30">Type</h3>
+<p>Integer - Accepts any, valid GID between 1000 and 60000.</p>
+<h3 id="default-30">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csgroup">- CS_GROUP</h2>
+<h3 id="description-33">Description</h3>
+<p>The new name that the future, primary group of the future user that will run CodeServer will have. Usually this is the username, but feel free to change it to whatever you want/need.</p>
+<h3 id="type-31">Type</h3>
+<p>String - Accepts any, valid Linux group name.</p>
+<h3 id="default-31">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csuid">- CS_UID</h2>
+<h3 id="description-34">Description</h3>
+<p>The UID that will be used when creating the future user that is running CodeServer. Use this to match any external UID on the host or on network drives.</p>
+<h3 id="type-32">Type</h3>
+<p>Integer - Accepts any, valid UID between 1000 and 60000.</p>
+<h3 id="default-32">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csuser">- CS_USER</h2>
+<h3 id="description-35">Description</h3>
+<p>The name of the future user that will be running CodeServer and that the container user will be working as.</p>
+<h3 id="type-33">Type</h3>
+<p>String - Accepts any valid Linux username.</p>
+<h3 id="default-33">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csuserhome">- CS_USER_HOME</h2>
+<h3 id="description-36">Description</h3>
+<p>The default path, where to create the future user's home directory. Per default this is '${HOME}/${CS_USER}'.</p>
+<h3 id="type-34">Type</h3>
+<p>String - Accepting full path to the new '${HOME}' directory location.</p>
+<h3 id="default-34">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csuserhomeenforceowner">- CS_USER_HOME_ENFORCE_OWNER</h2>
+<h3 id="description-37">Description</h3>
+<p>Imagine you were running the container with UID/GID 1234/1234 and now you have to change it to 2345/2345 because IT has changed something that affects your UID/GID. Well, you recreate the container with 'CS_UID' and 'CS_GID' set to 2345 and enable this setting. When the container boots for the first time, it recursively changes ownership of '${HOME}' for you.</p>
+<p><strong>BE VERY CAREFUL WITH THIS!</strong></p>
+<h3 id="type-35">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-35">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csusershell">- CS_USER_SHELL</h2>
+<h3 id="description-38">Description</h3>
+<p>When set, contains the full path to the executable of the new shell to use for the new user. The system does NOT test if the shell exists. User will be created, shell will be set, problem will be had.</p>
+<h3 id="type-36">Type</h3>
+<p>String - Accepts full path to executable of the new user's shell.</p>
+<h3 id="default-36">Default</h3>
+<p>Empty/Not set.</p>
+<h2 id="csverbose">- CS_VERBOSE</h2>
+<h3 id="description-39">Description</h3>
+<p>Enabling this setting makes the init scripts more chatty. Don't expect tooooo much...</p>
+<h3 id="type-37">Type</h3>
+<p>Boolean - Accepts &quot;True&quot;- and &quot;False&quot;-values.</p>
+<h3 id="default-37">Default</h3>
+<p>Empty/Not set.</p>
+
+    </body>
+    </html>

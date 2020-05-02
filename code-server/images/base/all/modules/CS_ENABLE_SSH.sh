@@ -42,19 +42,19 @@ function __isenabled_cs_enable_ssh() {
         true
     elif [[ "${__D_C_ENABLE_SSH}x" == "x" ]]; then
         declare __FS_ENABLED=""
-    elif __test_variable_text __D_C_ENABLE_SSH 1; then
+    elif __variable_text __D_C_ENABLE_SSH 1; then
         declare __FS_ENABLED="1"
-    elif __test_variable_text __D_C_ENABLE_SSH 0; then
+    elif __variable_text __D_C_ENABLE_SSH 0; then
         declare __FS_ENABLED=""
     fi
 
     __SETTINGS[CS_ENABLE_SSH]="${__FS_ENABLED}"
-    if __test_variable_exists CS_ENABLE_SSH; then
-        if __test_variable_empty CS_ENABLE_SSH; then
+    if __variable_exists CS_ENABLE_SSH; then
+        if __variable_empty CS_ENABLE_SSH; then
             true
-        elif __test_variable_text CS_ENABLE_SSH 1; then
+        elif __variable_text CS_ENABLE_SSH 1; then
             __SETTINGS[CS_ENABLE_SSH]=1
-        elif __test_variable_text CS_ENABLE_SSH 0; then
+        elif __variable_text CS_ENABLE_SSH 0; then
             __SETTINGS[CS_ENABLE_SSH]=""
         fi
     fi

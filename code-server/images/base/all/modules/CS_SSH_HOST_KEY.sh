@@ -163,7 +163,7 @@ function __post_cs_enable_ssh_host_key() {
     fi
 
     if [[ -f "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}" ]]; then
-        if __test_file_access_read_by_user "${__FSHK_OWNER}" "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}"; then
+        if __file_access "${__FSHK_OWNER}" r "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}"; then
             true
         elif chown "${__FSHK_OWNER}":"${__FSHK_GROUP}" "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}"; then
             if chmod "${__FSHK_MODE}" "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}"; then
@@ -212,7 +212,7 @@ function __psp_cs_enable_ssh_host_key() {
         __log e -- "The configured 'CS_ENABLE_SSH_HOST_KEY':'${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}' does not exist anymore. Not using it!\n"
         __init_results_add "CS_ENABLE_SSH_HOST_KEY" "Disabled"
         return 0
-    elif ! __test_file_access_read_by_user "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY_OWNER]}" "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}"; then
+    elif ! __file_access "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY_OWNER]}" r "${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}"; then
         __log e -- "The configured 'CS_ENABLE_SSH_HOST_KEY':'${__SETTINGS[CS_ENABLE_SSH_HOST_KEY]}' cannot be accessed by its configured owner: '${__SETTINGS[CS_ENABLE_SSH_HOST_KEY_OWNER]}' anymore. Not using it!\n"
         __init_results_add "CS_ENABLE_SSH_HOST_KEY" "Disabled"
         return 0

@@ -240,13 +240,13 @@ function __installer_repository_install() {
             return ${__T_ERROR}
         fi
 
-        if __test_variable_exists REPO_LIST_FILENAME; then
-            if __test_variable_empty REPO_LIST_FILENAME; then
+        if __variable_exists REPO_LIST_FILENAME; then
+            if __variable_empty REPO_LIST_FILENAME; then
                 __log e -- "'REPO_LIST_FILENAME' is empty. Not good...\n"
                 return 1
             else
                 if [[ -f "/etc/apt/sources.list.d/${REPO_LIST_FILENAME}" ]]; then
-                    if __test_variable_empty __P_FORCE; then
+                    if __variable_empty __P_FORCE; then
                         __log w -- "Repository already exists. '${__P_REPO_FILE}'. Aborting.\n"
                         return 0
                     else
@@ -265,8 +265,8 @@ function __installer_repository_install() {
             return 2
         fi
 
-        if __test_variable_exists "REPO_KEYS"; then
-            if __test_array_exists "REPO_KEYS"; then
+        if __variable_exists "REPO_KEYS"; then
+            if __array_exists "REPO_KEYS"; then
                 if [[ ${#REPO_KEYS[@]} -gt 0 ]]; then
                     for __T_REPO_KEY in "${REPO_KEYS[@]}"; do
                         if __installer_repository_install_key "${__T_REPO_KEY}" "${REPO_IGNORE_CERTIFICATE}"; then
@@ -300,8 +300,8 @@ function __installer_repository_install() {
             return ${__T_ERROR}
         fi
 
-        if __test_variable_exists "REPO_LIST_ENTRIES"; then
-            if __test_array_exists "REPO_LIST_ENTRIES"; then
+        if __variable_exists "REPO_LIST_ENTRIES"; then
+            if __array_exists "REPO_LIST_ENTRIES"; then
                 if [[ ${#REPO_LIST_ENTRIES[@]} -gt 0 ]]; then
                     if [[ -f "/etc/apt/sources.list.d/${REPO_LIST_FILENAME}" ]]; then
                         __log w -- "Repository '${REPO_LIST_FILENAME}' already exists. Deleting...\n"

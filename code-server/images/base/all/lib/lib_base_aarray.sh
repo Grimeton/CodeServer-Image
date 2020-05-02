@@ -35,6 +35,9 @@ fi
 # DO NOT MESS WITH THIS.
 # REALLY I MEAN IT.
 set -o nounset
+
+# export lib specific things
+declare -gx __AARRAY_LOADED=1
 declare -gx __AARRAY_TYPE_REGEX='^declare -[^\ ]*A[^\ ]*\ .*$'
 
 #####
@@ -320,7 +323,7 @@ function __aarray_get_value() {
 
     if [[ "${@:3:1}x" == "x" ]]; then
         declare __T_RETURN_RESULT=""
-    elif __test_variable_exists "${@:3:1}"; then
+    elif __variable_exists "${@:3:1}"; then
         declare -n __T_RETURN_RESULT="${@:3:1}"
         __T_RETURN_RESULT=""
     else
@@ -402,7 +405,7 @@ function __aarray_remove_key() {
 
     if [[ "${@:3:1}x" == "x" ]]; then
         declare __T_RETURN_RESULT=""
-    elif __test_variable_exists "${@:3:1}"; then
+    elif __variable_exists "${@:3:1}"; then
         declare -n __T_RETURN_RESULT="${@:3:1}"
     else
         declare __T_RETURN_RESULT=""

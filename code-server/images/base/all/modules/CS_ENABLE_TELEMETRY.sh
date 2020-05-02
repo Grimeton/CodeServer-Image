@@ -41,20 +41,20 @@ function __isenabled_cs_enable_telemetry() {
         true
     elif [[ "${__D_C_ENABLE_TELEMETRY}x" == "x" ]]; then
         declare __FT_ENABLED=""
-    elif __test_variable_text __D_C_ENABLE_TELEMETRY 1; then
+    elif __variable_text __D_C_ENABLE_TELEMETRY 1; then
         declare __FT_ENABLED="1"
-    elif __test_variable_text __D_C_ENABLE_TELEMETRY 0; then
+    elif __variable_text __D_C_ENABLE_TELEMETRY 0; then
         declare __FT_ENABLED=""
     fi
 
     __SETTINGS[CS_ENABLE_TELEMETRY]="${__FT_ENABLED}"
 
-    if __test_variable_exists CS_ENABLE_TELEMETRY; then
-        if __test_variable_empty CS_ENABLE_TELEMETRY; then
+    if __variable_exists CS_ENABLE_TELEMETRY; then
+        if __variable_empty CS_ENABLE_TELEMETRY; then
             true
-        elif __test_variable_text CS_ENABLE_TELEMETRY 1; then
+        elif __variable_text CS_ENABLE_TELEMETRY 1; then
             __SETTINGS[CS_ENABLE_TELEMETRY]=1
-        elif  __test_variable_text CS_ENABLE_TELEMETRY 0; then
+        elif  __variable_text CS_ENABLE_TELEMETRY 0; then
             __SETTINGS[CS_ENABLE_TELEMETRY]=""
         fi
     fi

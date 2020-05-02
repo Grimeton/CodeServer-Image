@@ -31,7 +31,7 @@ if ! (return 0 2>/dev/null); then
     echo "THIS IS A LIBRARY FILE AND SHOULD NOT BE CALLED DIRECTLY. '($(realpath "${0}"))'"
     exit 254
 fi
-
+lib_require "base_variable"
 function __isenabled_feature_wheel() {
 
     declare __FW_DEFAULT=""
@@ -40,9 +40,9 @@ function __isenabled_feature_wheel() {
         true
     elif [[ "${__D_C_ENABLE_WHEEL}x" == "x" ]]; then
         __FW_DEFAULT=""
-    elif __test_variable_text __D_C_ENABLE_WHEEL 1; then
+    elif __variable_text __D_C_ENABLE_WHEEL 1; then
         __FW_DEFAULT="1"
-    elif __test_variable_text __D_C_ENABLE_WHEEL 0; then
+    elif __variable_text __D_C_ENABLE_WHEEL 0; then
         __FW_DEFAULT=""
     fi
 
@@ -52,9 +52,9 @@ function __isenabled_feature_wheel() {
         true
     elif [[ "${CS_ENABLE_WHEEL}x" == "x" ]]; then
         true
-    elif __test_variable_text CS_ENABLE_WHEEL 1; then
+    elif __variable_text CS_ENABLE_WHEEL 1; then
         __SETTINGS[CS_ENABLE_WHEEL]="1"
-    elif __test_variable_text CS_ENABLE_WHEEL 0; then
+    elif __variable_text CS_ENABLE_WHEEL 0; then
         __SETTINGS[CS_ENABLE_WHEEL]=""
     fi
 

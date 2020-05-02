@@ -32,10 +32,10 @@ if ! (return 0 2>/dev/null); then
         exit 254
 fi
 
-if __test_variable_exists GLOBAL_PUBLIC_TAGS; then
-        if __test_array_exists GLOBAL_PUBLIC_TAGS; then
+if __variable_exists GLOBAL_PUBLIC_TAGS; then
+        if __array_exists GLOBAL_PUBLIC_TAGS; then
                 true
-        elif __test_variable_empty; then
+        elif __variable_empty; then
                 declare -ga GLOBAL_PUBLIC_TAGS=()
                 __logw -- GLOBAL_PUBLIC_TAGS
         else
@@ -49,10 +49,10 @@ fi
 
 __REGISTERED_VARIABLES+=(GLOBAL_PUBLIC_TAGS)
 
-if __test_variable_exists GLOBAL_PUBLIC_PUSH; then
-    if __test_variable_empty GLOBAL_PUBLIC_PUSH; then
+if __variable_exists GLOBAL_PUBLIC_PUSH; then
+    if __variable_empty GLOBAL_PUBLIC_PUSH; then
         declare -g GLOBAL_PUBLIC_PUSH=""
-    elif __test_variable_text_true GLOBAL_PUBLIC_PUSH; then
+    elif __variable_text GLOBAL_PUBLIC_PUSH 1; then
         declare -g GLOBAL_PUBLIC_PUSH=1
     else
         declare -g GLOBAL_PUBLIC_PUSH=""

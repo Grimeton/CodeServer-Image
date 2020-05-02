@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -33,6 +33,8 @@ if ! (return 0 2>/dev/null); then
     echo "THIS IS A LIBRARY FILE AND SHOULD NOT BE CALLED DIRECTLY. '($(realpath "${0}"))'"
     exit 254
 fi
+
+__lib_require "base_variable"
 
 function __isenabled_install_microsoft_powershell() {
 
@@ -54,12 +56,10 @@ function __isenabled_install_microsoft_powershell() {
         declare __IMP_DEFAULT=""
     elif [[ "${__D_C_INSTALL_MICROSOFT_POWERSHELL}" =~ ${__IMPREGEX_PACKAGENAME} ]]; then
         declare __IMP_DEFAULT="${__D_C_INSTALL_MICROSOFT_POWERSHELL}"
-    else
-        if __test_variable_text_true "${__D_C_INSTALL_MICROSOFT_POWERSHELL}"; then
-            declare __IMP_DEFAULT="1"
-        else
-            declare __IMP_DEFAULT=""
-        fi
+    elif __variable_text __D_C_INSTALL_MICROSOFT_POWERSHELL 1; then
+        declare __IMP_DEFAULT="1"
+    elif __variable_text __D_C_INSTALL_MICROSOFT_POWERSHELL 0; then
+        declare __IMP_DEFAULT=""
     fi
 
     if [[ -z ${__D_C_INSTALL_MICROSOFT_POWERSHELL_PACKAGE+x} ]]; then
@@ -77,13 +77,13 @@ function __isenabled_install_microsoft_powershell() {
         true
     elif [[ "${CS_INSTALL_MICROSOFT_POWERSHELL}" =~ ${__IMP_REGEX_PACKAGENAME} ]]; then
         __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]="${CS_INSTALL_MICROSOFT_POWERSHELL}"
-    elif __test_variable_text_true "${CS_INSTALL_MICROSOFT_POWERSHELL}"; then
+    elif __variable_text CS_INSTALL_MICROSOFT_POWERSHELL 1; then
         if [[ "${__IMP_DEFAULT}" =~ ${__IMP_REGEX_PACKAGENAME} ]]; then
             __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]="${__IMP_DEFAULT}"
         else
             __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]="${__IMP_DEFAULT_PACKAGENAME}"
         fi
-    elif __test_variable_text_false "${CS_INSTALL_MICROSOFT_POWERSHELL}"; then
+    elif __variable_text CS_INSTALL_MICROSOFT_POWERSHELL 0; then
         __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]=""
     fi
 

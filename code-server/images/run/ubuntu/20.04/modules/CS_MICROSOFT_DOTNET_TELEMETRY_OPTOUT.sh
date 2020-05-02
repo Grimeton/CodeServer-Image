@@ -34,6 +34,7 @@ if ! (return 0 2>/dev/null); then
     echo "THIS IS A LIBRARY FILE AND SHOULD NOT BE CALLED DIRECTLY. '($(realpath "${0}"))'"
     exit 254
 fi
+__lib_require "base_variable"
 
 function __isenabled_feature_microsoft_dotnet_telemetry_optout() {
 
@@ -51,9 +52,9 @@ function __isenabled_feature_microsoft_dotnet_telemetry_optout() {
         true
     elif [[ "${CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT}x" == "x" ]]; then
         true
-    elif __test_variable_text_true "${CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT}"; then
+    elif __variable_text CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT 1; then
         __SETTINGS[CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT]="1"
-    elif __test_variable_text_false "${CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT}"; then
+    elif __variable_text CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT} 0; then
         __SETTINGS[CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT]=""
     fi
 

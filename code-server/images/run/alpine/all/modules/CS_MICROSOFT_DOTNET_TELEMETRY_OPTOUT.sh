@@ -33,11 +33,11 @@ if ! (return 0 2>/dev/null); then
 fi
 
 function __isenabled_cs_microsoft_dotnet_telemetry_optout() {
-    if __test_variable_exists CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT; then
-        if __test_variable_empty CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT; then
+    if __variable_exists CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT; then
+        if __variable_empty CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT; then
             true
         else
-            if __test_variable_text_true CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT; then
+            if __variable_text CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT 1; then
                 __log i -- "(CS_MICROSOFT_DOTNET_TELEMETRY_OPTOUT) This feature is not supported on Alpine Linux."
             fi
         fi

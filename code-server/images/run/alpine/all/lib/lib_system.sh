@@ -42,7 +42,7 @@ function __group_id_get() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
     else
         declare __T_RETURN_VALUE=""
@@ -143,7 +143,7 @@ function __group_id_next() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
         declare -i __T_RETURN_VALUE=0
-    elif __test_variable_exists "${@:1:1}"; then
+    elif __variable_exists "${@:1:1}"; then
         declare -n __T_RETURN_VALUE="${@:1:1}"
     else
         declare -i __T_RETURN_VALUE=0
@@ -224,7 +224,7 @@ function __group_name_get() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
     else
         declare __T_RETURN_VALUE=""
@@ -342,7 +342,7 @@ function __user_id_next() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
         declare -i __T_RETURN_VALUE=0
-    elif __test_variable_exists "${@:1:1}"; then
+    elif __variable_exists "${@:1:1}"; then
         declare -n __T_RETURN_VALUE="${@:1:1}"
     else
         declare -i __T_RETURN_VALUE=0

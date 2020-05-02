@@ -76,7 +76,7 @@ function __isenabled_install_microsoft_dotnet_sdk() {
         true
     elif [[ "${CS_INSTALL_MICROSOFT_DOTNET_SDK}" =~ ${__IMDS_REGEX_PACKAGENAME} ]]; then
         __SETTINGS[CS_INSTALL_MICROSOFT_DOTNET_SDK]="${CS_INSTALL_MICROSOFT_DOTNET_SDK}"
-    elif __test_variable_text_true "${CS_INSTALL_MICROSOFT_DOTNET_SDK}"; then
+    elif __variable_text CS_INSTALL_MICROSOFT_DOTNET_SDK 1; then
         __SETTINGS[CS_INSTALL_MICROSOFT_DOTNET_SDK]="${__IMDS_DEFAULT_PACKAGENAME}"
     else
         __SETTINGS[CS_INSTALL_MICROSOFT_DOTNET_SDK]=""

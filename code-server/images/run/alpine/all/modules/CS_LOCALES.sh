@@ -33,11 +33,11 @@ if ! (return 0 2>/dev/null); then
 fi
 
 function __isenabled_cs_locales() {
-    if __test_variable_exists CS_LOCALES; then
-        if __test_variable_empty CS_LOCALES; then
+    if __variable_exists CS_LOCALES; then
+        if __variable_empty CS_LOCALES; then
             true
         else
-            if __test_array_exists CS_LOCALES; then
+            if __array_exists CS_LOCALES; then
                 __log i -- "(CS_LOCALES) This feature is not supported on Alpine Linux."
             fi
         fi

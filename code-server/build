@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -47,12 +47,13 @@ function __show_usage() {
     echo "-s [version suffix] - A string representing a suffix, e.g.: \"slim\""
     echo "-t [type] - The type you want to create, e.g. docker, package, snap"
     echo "-x - Disable public pushes globally."
+    echo "-y - Disable generation of public tags."
     echo "-z [BUILD VARIABLE]=[VALUE] - A variable/value combination that will be put into the config file."
     echo ""
     return 0
 }
 
-while getopts b:c:d:e:g:h:i:j:r:s:t:xz: __OPTION; do
+while getopts :b:c:d:e:g:h:i:j:r:s:t:xyz: __OPTION; do
 
     case "${__OPTION}" in
     b) __T_BUILD_BUILDVERSION="${OPTARG}" ;;
@@ -60,15 +61,19 @@ while getopts b:c:d:e:g:h:i:j:r:s:t:xz: __OPTION; do
     d) __T_ID="${OPTARG}" ;;
     e) __T_VERSIONID="${OPTARG}" ;;
     g) __T_GLOBAL_BUILDVERSION="${OPTARG}" ;;
-    h) __T_GLOBAL_IMAGE_NAME="${OPTARG}";;
-    i) __T_BUILD_IMAGE_NAME="${OPTARG}";;
-    j) __T_RUN_IMAGE_NAME="${OPTARG}";;
+    h) __T_GLOBAL_IMAGE_NAME="${OPTARG}" ;;
+    i) __T_BUILD_IMAGE_NAME="${OPTARG}" ;;
+    j) __T_RUN_IMAGE_NAME="${OPTARG}" ;;
     r) __T_RUN_BUILDVERSION="${OPTARG}" ;;
     s) __T_VERSION_SUFFIX="${OPTARG}" ;;
-    t) __T_TYPE="${OPTARG}";;
-    x) __T_GLOBAL_PUSH_OVERRIDE=1;;
-    z) __T_VARS+=("${OPTARG}");;
-    ?) __show_usage ;;
+    t) __T_TYPE="${OPTARG}" ;;
+    x) __T_GLOBAL_PUSH_OVERRIDE=1 ;;
+    y) __T_GLOBAL_CONFIG_VERIFY_PUBLIC=0 ;;
+    z) __T_VARS+=("${OPTARG}") ;;
+    ?)
+        __show_usage
+        exit 11
+        ;;
     esac
 
 done
@@ -106,18 +111,18 @@ elif [[ "${__T_TYPE,,}" == "docker" ]]; then
 elif [[ "${__T_TYPE,,}" == "pdebian" ]]; then
     declare __T_TYPE="pdebian"
     echo "'${__T_TYPE}' not implemented yet."
-    exit 253;
+    exit 253
 elif [[ "${__T_TYPE,,}" == "pubuntu" ]]; then
     declare __T_TYPE="pubuntu"
     echo "'${__T_TYPE}' not implemented yet."
-    exit 253;
+    exit 253
 elif [[ "${__T_TYPE,,}" == "snap" ]]; then
     declare __T_TYPE="snap"
     echo "'${__T_TYPE}' not implemented yet."
-    exit 253;
+    exit 253
 else
     echo "Type: '${__T_TYPE}' is unknown."
-    exit 254;
+    exit 254
 fi
 
 if [[ -f "${__T_CONFIGURATION_FILE}" ]]; then
@@ -137,23 +142,27 @@ if [[ -f "${__T_CONFIGURATION_FILE}" ]]; then
         echo "GLOBAL_BUILDVERSION_SUFFIX=\"${__T_VERSION_SUFFIX}\"" >>"${__T_TEMP_FILE}"
     fi
     if [[ -n ${__T_GLOBAL_IMAGE_NAME+x} ]]; then
-        echo "GLOBAL_DOCKER_ARG_FROM=\"${__T_GLOBAL_IMAGE_NAME}\"" >> "${__T_TEMP_FILE}"
+        echo "GLOBAL_DOCKER_ARG_FROM=\"${__T_GLOBAL_IMAGE_NAME}\"" >>"${__T_TEMP_FILE}"
     fi
     if [[ -n ${__T_BUILD_IMAGE_NAME+x} ]]; then
-        echo "BUILD_DOCKER_ARG_FROM=\"${__T_BUILD_IMAGE_NAME}\"" >> "${__T_TEMP_FILE}"
+        echo "BUILD_DOCKER_ARG_FROM=\"${__T_BUILD_IMAGE_NAME}\"" >>"${__T_TEMP_FILE}"
     fi
     if [[ -n ${__T_RUN_IMAGE_NAME+x} ]]; then
-        echo "RUN_DOCKER_ARG_FROM=\"${__T_RUN_IMAGE_NAME}\"" >> "${__T_TEMP_FILE}"
+        echo "RUN_DOCKER_ARG_FROM=\"${__T_RUN_IMAGE_NAME}\"" >>"${__T_TEMP_FILE}"
     fi
     if [[ -n ${__T_GLOBAL_PUSH_OVERRIDE+x} ]]; then
-        echo "GLOBAL_PUSH_OVERRIDE=1" >> "${__T_TEMP_FILE}"
+        echo "GLOBAL_PUSH_OVERRIDE=1" >>"${__T_TEMP_FILE}"
     fi
+    if [[ -n ${__T_GLOBAL_CONFIG_VERIFY_PUBLIC} ]]; then
+        echo "GLOBAL_CONFIG_VERIFY_PUBLIC=${__T_GLOBAL_CONFIG_VERIFY_PUBLIC}" >>"${__T_TEMP_FILE}"
+    fi
+
     if [[ ${#__T_VARS} -gt 0 ]]; then
         for __T_VAR in "${__T_VARS[@]}"; do
-            echo "${__T_VAR}" >> "${__T_TEMP_FILE}"
+            echo "${__T_VAR}" >>"${__T_TEMP_FILE}"
         done
     fi
-    
+
     exec /usr/bin/env - "${__COMMAND_PREFIX[@]}" "${__T_BASE_DIR}/_build.sh" "${__T_TEMP_FILE}"
     rm "${__T_TEMP_FILE}"
 

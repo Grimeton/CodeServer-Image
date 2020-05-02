@@ -41,19 +41,19 @@ function __isenabled_cs_enable_updates() {
         true
     elif [[ "${__D_C_ENABLE_UPDATES}x" == "x" ]]; then
         declare __FCEN_DEFAULT=""
-    elif __test_variable_text __D_C_ENABLE_UPDATES 1; then
+    elif __variable_text __D_C_ENABLE_UPDATES 1; then
         declare __FCEN_DEFAULT="1"
-    elif __test_variable_text __D_C_ENABLE_UPDATES 0; then
+    elif __variable_text __D_C_ENABLE_UPDATES 0; then
         declare __FCEN_DEFAULT=""
     fi
 
     __SETTINGS[CS_ENABLE_UPDATES]="${__FCEN_DEFAULT}"
-    if __test_variable_exists CS_ENABLE_UPDATES; then
-        if __test_variable_empty CS_ENABLE_UPDATES; then
+    if __variable_exists CS_ENABLE_UPDATES; then
+        if __variable_empty CS_ENABLE_UPDATES; then
             true
-        elif __test_variable_text CS_ENABLE_UPDATES 1; then
+        elif __variable_text CS_ENABLE_UPDATES 1; then
             __SETTINGS[CS_ENABLE_UPDATES]="1"
-        elif __test_variable_text CS_ENABLE_UPDATES 0; then
+        elif __variable_text CS_ENABLE_UPDATES 0; then
             __SETTINGS[CS_ENABLE_UPDATES]=""
         fi
     fi

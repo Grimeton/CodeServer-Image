@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -68,7 +68,7 @@ function __lib_file_get_full_path() {
     fi
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_LIB_FGFP_RETURN_VALUE=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_LIB_FGFP_RETURN_VALUE="${@:2:1}"
     else
         declare __T_LIB_FGFP_RETURN_VALUE=""
@@ -246,7 +246,7 @@ function __lib_file_get_most_significant() {
     fi
     if [[ "${@:4:1}x" == "x" ]]; then
         declare __T_RET_VAL=""
-    elif __test_variable_exists "${@:4:1}"; then
+    elif __variable_exists "${@:4:1}"; then
         declare -n __T_RET_VAL="${@:4:1}"
     else
         declare __T_RET_VAL=""
@@ -316,12 +316,22 @@ function __lib_filename_from_libname() {
 # DO NOT USE ANY OTHER FUNCTION FROM OTHER BASE LIBRARIES HERE. THEY ARE NOT LOADED YET
 #
 function __lib_init() {
-    declare -agx __LIB_PACKAGES_LOADED=()
+
+    unset __LIB_PACKAGES_LOADED
+    declare -Agx __LIB_PACKAGES_LOADED=()
     declare __T_LIB_DIRECTORY="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
     declare __T_LIB_REGEX_IMAGES_BASE='^.*/images/base/all/lib'
 
     if declare -p "BASH_SOURCE" >/dev/null 2>&1; then
-        if declare -p "__INIT_VERSION" >/dev/null 2>&1 && [[ "${__INIT_VERSION}x" != "x" ]]; then
+        if (declare -p "__INIT_VERSION" >/dev/null 2>&1 && [[ "${__INIT_VERSION}x" != "x" ]]) || [[ "${0##*/}" == "init" ]]; then
+
+            if ! declare -p __INIT_VERSION >/dev/null 2>&1; then
+                declare -gx __INIT_VERSION="0.00"
+            elif [[ "${__INIT_VERSION}x" == "x" ]]; then
+                unset __INIT_VERSION
+                declare -gx __INIT_VERSION="0.00"
+            fi
+
             # we're running in init, at least we're assuming we do
             declare -gx G_LIB_DIR="${__T_LIB_DIRECTORY}"
             declare -gx G_LIB_LOADED="true"
@@ -329,7 +339,15 @@ function __lib_init() {
             return 0
         fi
 
-        if declare -p __INSTALLER_VERSION >/dev/null 2>&1 && [[ "${__INSTALLER_VERSION}x" != "x" ]]; then
+        if (declare -p __INSTALLER_VERSION >/dev/null 2>&1 && [[ "${__INSTALLER_VERSION}x" != "x" ]]) || [[ "${0##*/}" == "installer.sh" ]]; then
+
+            if ! declare -p __INSTALLER_VERSION >/dev/null 2>&1; then
+                declare -gx __INSTALLER_VERSION="0.00"
+            elif [[ "${__INSTALLER_VERSION}x" == "x" ]]; then
+                unset __INSTALLER_VERSION
+                declare -gx __INSTALLER_VERSION="0.00"
+            fi
+
             # looks like we're doing the installer.
             declare -gx G_LIB_DIR="${__T_LIB_DIRECTORY}"
             declare -gx G_LIB_LOADED="true"
@@ -390,10 +408,14 @@ function __lib_init() {
 #
 function __lib_init_defaults() {
 
-    if ! declare -p G_LIB_LOADED >/dev/null 2>&1 ||
-        ([[ "${G_LIB_LOADED,,}" != "true" ]] && [[ "${G_LIB_LOADED}" != "1" ]]); then
-        if ! __lib_init; then
-            echo "COULD NOT LOAD THE LIBRARY. EXITING."
+    if declare -p G_LIB_LOADED >/dev/null 2>&1 && ([[ "${G_LIB_LOADED,,}" == "true" ]] || [[ "${G_LIB_LOADED}" == "1" ]]); then
+        echo "LIBRARY ALREADY LOADED: G_LIB_LOADED: '${G_LIB_LOADED}'."
+        exit 254
+    else
+        if __lib_init; then
+            true
+        else
+            echo "COULD NOT LOAD THE LIBRARY ($?). EXITING."
             return 254
         fi
     fi
@@ -644,6 +666,7 @@ function __lib_package_load() {
     else
         declare __P_PACKAGENAME="${@:1:1}"
     fi
+
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __P_DISTRIBUTION_ID="${ID}"
     else
@@ -663,15 +686,11 @@ function __lib_package_load() {
     fi
 
     if [[ -z ${__LIB_PACKAGES_LOADED[@]+x} ]]; then
-        declare -ag __LIB_PACKAGES_LOADED=()
+        declare -Ag __LIB_PACKAGES_LOADED=()
     fi
-    
-    if [[ ${#__LIB_PACKAGES_LOADED[@]} -gt 0 ]]; then
-        for __T_PACKAGE_LOADED in "${__LIB_PACKAGES_LOADED[@]}"; do
-            if [[ "${__T_PACKAGE_LOADED,,}" == "${__P_PACKAGENAME,,}" ]]; then
-                return 0
-            fi
-        done
+
+    if [[ -n ${__LIB_PACKAGES_LOADED["${__P_PACKAGENAME,,}"]:+x} ]]; then
+        return 0
     fi
 
     declare __T_DISTRIBUTION_ID="${__P_DISTRIBUTION_ID}"
@@ -679,7 +698,6 @@ function __lib_package_load() {
     declare __T_STAGES_IFS="${__P_STAGES_IFS}"
     declare __T_PACKAGE_FILENAME=""
 
-    declare __T_PACKAGE_FILENAME=""
     if __lib_filename_from_libname "${__P_PACKAGENAME}" __T_PACKAGE_FILENAME; then
         true
     else
@@ -691,7 +709,7 @@ function __lib_package_load() {
     if [[ "${G_LIB_STAGE}" == "init" || "${G_LIB_STAGE}" == "installer" ]]; then
         if [[ -f "${G_LIB_DIR}/${__T_PACKAGE_FILENAME}" ]]; then
             if source "${G_LIB_DIR}/${__T_PACKAGE_FILENAME}"; then
-                __LIB_PACKAGES_LOADED+=("${__P_PACKAGENAME,,}")
+                __LIB_PACKAGES_LOADED["${__P_PACKAGENAME,,}"]=1
                 return 0
             fi
         fi
@@ -699,7 +717,7 @@ function __lib_package_load() {
     elif [[ "${G_LIB_STAGE}" == "build" ]]; then
         if ! declare -p GLOBAL_DEBUG >/dev/null 2>&1 || [[ "${GLOBAL_DEBUG}x" == "x" ]]; then
             if source <(__lib_package_create_all "${__T_PACKAGE_FILENAME}" "${__T_DISTRIBUTION_ID}" "${__T_DISTRIBUTION_VERSION_ID}" "${__T_STAGES_IFS}"); then
-                __LIB_PACKAGES_LOADED+=("${__P_PACKAGENAME,,}")
+                __LIB_PACKAGES_LOADED["${__P_PACKAGENAME,,}"]=1
                 return 0
             fi
         else
@@ -707,7 +725,7 @@ function __lib_package_load() {
             __LIB_DEBUG_FILES+=("${__T_MKTEMP}")
             if __lib_package_create_all_file "${__T_MKTEMP}" "${__T_PACKAGE_FILENAME}" "${__T_DISTRIBUTION_ID}" "${__T_DISTRIBUTION_VERSION_ID}" "${__T_STAGES_IFS}"; then
                 if source "${__T_MKTEMP}"; then
-                    __LIB_PACKAGES_LOADED+=("${__P_PACKAGENAME,,}")
+                    __LIB_PACKAGES_LOADED["${__P_PACKAGENAME,,}"]=1
                     return 0
                 fi
             fi
@@ -720,45 +738,58 @@ function __lib_package_load() {
     return 1
 }
 
-function __variable_name_random() {
-    declare __VARIABLE_REGEX_VALID_CHARACTERS='^[a-zA-Z0-9_]+$'
-    declare __VARIABLE_REGEX_NUMBER='^[0-9]+$'
-    declare -i __VARIABLE_NAME_RANDOM_LENGTH_DEFAULT=10
-
+#####
+#
+# - __lib_require
+#
+# - Description
+#   Takes the name of one or more packages to be loaded.
+#
+# - Parameters
+#   - #1+ [IN|MANDATORY]: PACKAGENAMES - The name(s) of the packages to be loaded.
+#
+# - Return values
+#   - 0 on success
+#   - >0 on failure
+#
+function __lib_require() {
     if [[ "${@:1:1}x" == "x" ]]; then
-        declare __P_PREFIX=""
-    elif [[ "${@:1:1}" =~ ${__VARIABLE_REGEX_VALID_CHARACTERS} ]]; then
-        declare __P_PREFIX="${@:1:1}"
-    else
         return 101
-    fi
-
-    if [[ "${@:2:1}x" == "x" ]]; then
-        declare -i __P_LENGTH=${__VARIABLE_NAME_RANDOM_LENGTH_DEFAULT}
-    elif [[ "${@:2:1}x" =~ ${__VARIABLE_REGEX_NUMBER} ]]; then
-        declare -i __P_LENGTH=${@:2:1}
     else
-        declare -i __P_LENGTH=${__VARIABLE_NAME_RANDOM_LENGTH_DEFAULT}
+        declare -a __P_PACKAGENAMES=("${@}")
     fi
 
-    if [[ "${@:3:1}x" == "x" ]]; then
-        declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:3:1}"; then
-        declare -n __T_RETURN_VALUE="${@:3:1}"
-        __T_RETURN_VALUE=""
+    # if the library has already loaded packages, try to filter out
+    # the ones loaded here instead of calling __lib_package_load for
+    # each package
+    if [[ -n ${__LIB_PACKAGES_LOADED[@]:+x} ]]; then
+        declare -a __T_PACKAGES_MISSING=()
+        for __T_PACKAGE in "${__P_PACKAGENAMES[@]}"; do
+            if [[ -z ${__LIB_PACKAGES_LOADED["${__T_PACKAGE,,}"]:+x} ]]; then
+                __T_PACKAGES_MISSING+=("${__T_PACKAGE}")
+            fi
+        done
     else
-        declare __T_RETURN_VALUE=""
+        declare -a __T_PACKAGES_MISSING=("${__P_PACKAGENAMES[@]}")
     fi
 
-    declare __T_RANDOM_VARIABLE_NAME="${__P_PREFIX}"
-    __T_RANDOM_VARIABLE_NAME+="$(cat /dev/urandom | tr -dc 'A-Z0-9_' | fold -w "${__P_LENGTH}" | head -n 1)"
-    declare __T_VARIABLE_NR_RETURN_VALUE="${__T_RANDOM_VARIABLE_NAME}"
-    while __test_variable_exists "${__T_VARIABLE_NR_RETURN_VALUE}"; do
-        __variable_name_random "${__P_PREFIX}" "${__P_LENGTH}" "__T_VARIABLE_NR_RETURN_VALUE"
+    if [[ ${#__T_PACKAGES_MISSING[@]} -lt 1 ]]; then
+        return 0
+    fi
+
+    declare __T_LOAD_OPTIONS=()
+    if [[ "${G_LIB_STAGE}" == "build" ]]; then
+        __T_LOAD_OPTIONS+=("${ID}" "${VERSION_ID}" "base,build")
+    fi
+
+    for __T_PACKAGE in "${__P_PACKAGENAMES[@]}"; do
+        if __lib_package_load "${__T_PACKAGE}" "${__T_LOAD_OPTIONS[@]}"; then
+            continue
+        else
+            return $?
+        fi
     done
-    __T_RETURN_VALUE="${__T_VARIABLE_NR_RETURN_VALUE}"
-    if [[ ! -R __T_RETURN_VALUE ]]; then
-        echo "${__T_RETURN_VALUE}"
-    fi
+
     return 0
+
 }

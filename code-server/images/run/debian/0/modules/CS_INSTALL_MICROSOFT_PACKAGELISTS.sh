@@ -35,10 +35,10 @@ fi
 
 function __isenabled_install_microsoft_packagelists() {
 
-    if __test_variable_exists CS_INSTALL_MICROSOFT_PACKAGELISTS; then
-        if __test_variable_empty CS_INSTALL_MICROSOFT_PACKAGELISTS; then
+    if __variable_exists CS_INSTALL_MICROSOFT_PACKAGELISTS; then
+        if __variable_empty CS_INSTALL_MICROSOFT_PACKAGELISTS; then
             true
-        elif __test_variable_text_true CS_INSTALL_MICROSOFT_PACKAGELISTS; then
+        elif __variable_text CS_INSTALL_MICROSOFT_PACKAGELISTS 1; then
             __log i -- "(CS_INSTALL_MICROSOFT_PACKAGELISTS) This feature is not available on Debian/Sid."
         fi
     fi

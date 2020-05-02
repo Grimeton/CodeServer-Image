@@ -452,7 +452,7 @@ function __pm_package_install_needed() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
-    elif __test_array_exists "${@:1:1}"; then
+    elif __array_exists "${@:1:1}"; then
         declare -n __T_PPNEI_PACKAGES_NOT_INSTALLED_AVAILABLE="${@:1:1}"
         declare -a __T_PPNEI_PACKAGES_TO_INSTALL=("${@:2}")
     else
@@ -515,7 +515,7 @@ function __pm_package_installed_not() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
-    elif __test_array_exists "${@:1:1}"; then
+    elif __array_exists "${@:1:1}"; then
         declare -n __T_PPNI_PACKAGES_NOT_INSTALLED="${@:1:1}"
         declare -a __P_PACKAGES=("${@:2}")
     else

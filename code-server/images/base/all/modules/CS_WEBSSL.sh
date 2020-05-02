@@ -39,8 +39,8 @@ function __isenabled_cs_webssl_cert() {
     __SETTINGS[CS_WEBSSL_CERT]=""
     __SETTINGS[CS_WEBSSL_KEY]=""
 
-    if __test_variable_exists CS_WEBSSL_CERT; then
-        if __test_variable_empty CS_WEBSSL_CERT; then
+    if __variable_exists CS_WEBSSL_CERT; then
+        if __variable_empty CS_WEBSSL_CERT; then
             true
         else
             __SETTINGS[CS_WEBSSL_CERT]="${CS_WEBSSL_CERT}"
@@ -49,8 +49,8 @@ function __isenabled_cs_webssl_cert() {
         true
     fi
 
-    if __test_variable_exists CS_WEBSSL_KEY; then
-        if __test_variable_empty CS_WEBSSL_KEY; then
+    if __variable_exists CS_WEBSSL_KEY; then
+        if __variable_empty CS_WEBSSL_KEY; then
             true
         else
             __SETTINGS[CS_WEBSSL_KEY]="${CS_WEBSSL_KEY}"
@@ -59,16 +59,16 @@ function __isenabled_cs_webssl_cert() {
         true
     fi
 
-    if __test_variable_exists CS_WEBSSL_KEY_PERMISSIONS; then
-        if __test_variable_empty CS_WEBSSL_KEY_PERMISSIONS; then
+    if __variable_exists CS_WEBSSL_KEY_PERMISSIONS; then
+        if __variable_empty CS_WEBSSL_KEY_PERMISSIONS; then
             true
         else
             __SETTINGS[CS_WEBSSL_KEY_PERMISSIONS]="${CS_WEBSSL_KEY_PERMISSIONS}"
         fi
     fi
 
-    if __test_variable_exists CS_WEBSSL_CERT_PERMISSIONS; then
-        if __test_variable_empty CS_WEBSSL_CERT_PERMISSIONS; then
+    if __variable_exists CS_WEBSSL_CERT_PERMISSIONS; then
+        if __variable_empty CS_WEBSSL_CERT_PERMISSIONS; then
             true
         else
             __SETTINGS[CS_WEBSSL_CERT_PERMISSIONS]="${CS_WEBSSL_CERT_PERMISSIONS}"
@@ -197,11 +197,11 @@ function __post_cs_webssl_cert() {
         return 0
     fi
 
-    if __test_file_access_read_by_user "${__FWC_USERNAME}" "${__SETTINGS[CS_WEBSSL_CERT]}"; then
+    if __file_access "${__FWC_USERNAME}" r "${__SETTINGS[CS_WEBSSL_CERT]}"; then
         true
     elif chown "${__FWC_USERNAME}":"${__FWC_GROUPNAME}" "${__SETTINGS[CS_WEBSSL_CERT]}"; then
         if chmod "${__SETTINGS[CS_WEBSSL_CERT_PERMISSIONS]}" "${__SETTINGS[CS_WEBSSL_CERT]}"; then
-            if __test_file_access_read_by_user "${__FWC_USERNAME}" "${__SETTINGS[CS_WEBSSL_CERT]}"; then
+            if __file_access "${__FWC_USERNAME}" r "${__SETTINGS[CS_WEBSSL_CERT]}"; then
                 true
             else
                 __SETTINGS[CS_WEBSSL_CERT]=""
@@ -220,7 +220,7 @@ function __post_cs_webssl_cert() {
         return 0
     fi
 
-    if __test_file_access_read_by_user "${__FWC_USERNAME}" "${__SETTINGS[CS_WEBSSL_KEY]}"; then
+    if __file_access "${__FWC_USERNAME}" r "${__SETTINGS[CS_WEBSSL_KEY]}"; then
         true
     elif chown "${__FWC_USERNAME}":"${__FWC_GROUPNAME}" "${__SETTINGS[CS_WEBSSL_KEY]}"; then
         if chmod "${__SETTINGS[CS_WEBSSL_KEY_PERMISSIONS]}" "${__SETTINGS[CS_WEBSSL_KEY]}"; then
@@ -274,8 +274,8 @@ function __psp_cs_webssl_cert() {
         __init_results_add "CS_WEBSSL_CERT" "Automatic"
         __START_PARAMETERS+=("--cert")
         return 0
-    elif __test_file_access_read_by_user "${__FWC_USERNAME}" "${__SETTINGS[CS_WEBSSL_CERT]}"; then
-        if __test_file_access_read_by_user "${__FWC_USERNAME}" "${__SETTINGS[CS_WEBSSL_KEY]}"; then
+    elif __file_access "${__FWC_USERNAME}" r "${__SETTINGS[CS_WEBSSL_CERT]}"; then
+        if __file_access "${__FWC_USERNAME}" r "${__SETTINGS[CS_WEBSSL_KEY]}"; then
             __init_results_add "CS_WEBSSL_CERT" "${__SETTINGS[CS_WEBSSL_CERT]}"
             __init_results_add "CS_WEBSSL_KEY" "${__SETTINGS[CS_WEBSSL_KEY]}"
             __START_PARAMETERS+=("--cert" "${__SETTINGS[CS_WEBSSL_CERT]}")

@@ -149,7 +149,7 @@ function __init_function_register() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         return 103
-    elif __test_function_exists "${@:2:1}"; then
+    elif __variable_type_function "${@:2:1}"; then
         declare __P_FUNCTIONNAME="${@:2:1}"
     else
         return 104
@@ -201,7 +201,7 @@ function __init_function_register_always() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         return 103
-    elif __test_function_exists "${@:2:1}"; then
+    elif __variable_type_function "${@:2:1}"; then
         declare __P_FUNCTIONNAME="${@:2:1}"
     else
         return 104
@@ -262,7 +262,7 @@ function __init_function_register_replace() {
 
     if [[ "${@:3:1}x" == "x" ]]; then
         return 104
-    elif __test_function_exists "${@:3:1}"; then
+    elif __variable_type_function "${@:3:1}"; then
         declare __P_FUNCTIONNAME_NEW="${@:3:1}"
     else
         return 105
@@ -564,7 +564,7 @@ function __init_stage_arrayname_get() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare -a __T_ISAG_INIT_STAGE_ARRAYNAME=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_ISAG_INIT_STAGE_ARRAYNAME="${@:2:1}"
     else
         declare -a __T_ISAG_INIT_STAGE_ARRAYNAME=""
@@ -599,7 +599,7 @@ function __init_stage_register() {
     fi
     if __aarray_exists __INIT_STAGE_REGISTERED_STAGES; then
         true
-    elif __test_variable_exists __INIT_STAGE_REGISTERED_STAGES; then
+    elif __variable_exists __INIT_STAGE_REGISTERED_STAGES; then
         if unset __INIT_SAGE_REGISTERED_STAGES; then
             if declare -Agx __INIT_STAGE_REGISTERED_STAGES=(); then
                 true
@@ -782,7 +782,7 @@ function __init_stage_run() {
             __T_ROW_PREFIX="0${__T_ROW_PREFIX}"
         done
         declare __T_ROW_NAME="${__T_ROW_PREFIX}__STAGE${__P_STAGENAME}__${__T_FN}"
-        if __test_function_exists "${__T_FN}"; then
+        if __variable_type_function "${__T_FN}"; then
             if ${__T_FN}; then
                 if __aarray_exists __INIT_RESULTS; then
                     __INIT_RESULTS[${__T_ROW_NAME}]=0
@@ -999,7 +999,7 @@ function __init_parameter_start_register() {
 
     if __array_exists __INIT_PARAMETER_START; then
         true
-    elif __test_variable_exists __INIT_PARAMETER_START; then
+    elif __variable_exists __INIT_PARAMETER_START; then
         if undef __INIT_PARAMETER_START; then
             if declare -agx __INIT_PARAMETER_START=(); then
                 true

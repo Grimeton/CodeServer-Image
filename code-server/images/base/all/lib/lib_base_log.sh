@@ -32,11 +32,19 @@ if ! (return 0 2>/dev/null); then
     exit 254
 fi
 
-if [[ -z ${__LOG_DEBUG+x} ]]; then
+__lib_require "base_variable"
+declare -gx __LOG_LOADED=1
+
+if [[ -z ${__LOG_DEBUG:+x} ]]; then
     declare -gx __LOG_DEBUG=""
+else
+    declare -gx __LOG_DEBUG
 fi
-if [[ -z ${__LOG_VERBOSE+x} ]]; then
+
+if [[ -z ${__LOG_VERBOSE:+x} ]]; then
     declare -gx __LOG_VERBOSE=""
+else
+    declare -gx __LOG_VERBOSE
 fi
 
 if [[ -n ${__D_TEXT_REGEX_NUMBER+x} ]] && [[ "${__D_TEXT_REGEX_NUMBER}x" != "x" ]]; then
@@ -80,9 +88,9 @@ for __T_LOG_COLOUR in "${__LOG_IMPORT_TERMINAL_COLOURS[@]}"; do
     declare __TEST_VARNAME_OTHER="__D_TERMINAL_COLOURS_${__T_LOG_COLOUR}"
 
     # prefer ansi over other
-    if __test_variable_exists "${__TEST_VARNAME_ANSI}"; then
+    if __variable_exists "${__TEST_VARNAME_ANSI}"; then
         declare -gx ""${__THIS_VARNAME}"="${!__TEST_VARNAME_ANSI}""
-    elif __test_variable_exists "${__TEST_VARNAME_OTHER}"; then
+    elif __variable_exists "${__TEST_VARNAME_OTHER}"; then
         declare -gx ""${__THIS_VARNAME}"="${!__TEST_VARNAME_OTHER}""
     else
         declare -gx ""${__THIS_VARNAME}"="""
@@ -453,7 +461,7 @@ function __log_variable() {
     fi
     if [[ "${@:2:1}x" == "x" ]]; then
         return 103
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare __P_VARNAME="${@:2:1}"
     else
         return 104
@@ -483,7 +491,7 @@ function __log_variable() {
         __T_VARIABLE_VALUE="$(declare -p "${__T_TEST_VARNAME}" | sed -E 's/^([^=]+)=(.*)$/\2/g')"
     elif __aarray_exists "${__T_TEST_VARNAME}"; then
         __T_VARIABLE_VALUE="$(declare -p "${__T_TEST_VARNAME}" | sed -E 's/^([^=]+)=(.*)$/\2/g')"
-    elif __test_variable_exists "${__T_TEST_VARNAME}"; then
+    elif __variable_exists "${__T_TEST_VARNAME}"; then
         __T_VARIABLE_VALUE="${!__T_TEST_VARNAME}"
     else
         return 11

@@ -35,7 +35,10 @@ fi
 # DO NOT MESS WITH THIS.
 # REALLY I MEAN IT.
 set -o nounset
+
+# export lib specific things
 declare -gx __ARRAY_TYPE_REGEX='^declare -([^\ ]*a[^\ ]*)\ .*'
+declare -gx __ARRAY_LOADED=1
 
 #####
 #
@@ -54,7 +57,7 @@ declare -gx __ARRAY_TYPE_REGEX='^declare -([^\ ]*a[^\ ]*)\ .*'
 function __array_add() {
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
-    elif __test_array_exists "${@:1:1}"; then
+    elif __array_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
         return 102
@@ -91,7 +94,7 @@ function __array_add() {
 function __array_add_always() {
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
-    elif __test_array_exists "${@:1:1}"; then
+    elif __array_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
         return 102
@@ -224,7 +227,7 @@ function __array_exists() {
 function __array_remove() {
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
-    elif __test_array_exists "${@:1:1}"; then
+    elif __array_exists "${@:1:1}"; then
         declare -n __P_ARRAY="${@:1:1}"
     else
         return 102

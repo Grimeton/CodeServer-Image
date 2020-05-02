@@ -53,7 +53,7 @@ function __logw() {
         declare __P_VARNAME="${@:2:1}"
     fi
 
-    if __test_array_exists "${__P_VARNAME}" || __test_array_associative "${__P_VARNAME}"; then
+    if __array_exists "${__P_VARNAME}" || __aarray_exists "${__P_VARNAME}"; then
         __log w "${__P_INDENT}" "(${__P_VARNAME}) is not set. Using default: '${!__P_VARNAME[@]}'.\n"
     else
         __log w "${__P_INDENT}" "(${__P_VARNAME}) is not set. Using default: '${!__P_VARNAME}'.\n"
@@ -126,10 +126,16 @@ if [[ -z ${GLOBAL_BUILDVERSION_FINAL+x} ]]; then
 fi
 __REGISTERED_VARIABLES+=(GLOBAL_BUILDVERSION_FINAL)
 
-if ! __test_variable_exists GLOBAL_CONFIG_FILENAME || __test_variable_empty GLOBAL_CONFIG_FILENAME; then
+if ! __variable_exists GLOBAL_CONFIG_FILENAME || __variable_empty GLOBAL_CONFIG_FILENAME; then
     __log e -- "GLOBAL_CONFIG_FILENAME IS EMPTY.\n"
     exit 199
 fi
+
+if [[ -z ${GLOBAL_CONFIG_VERIFY_PUBLIC+x} ]]; then
+    GLOBAL_CONFIG_VERIFY_PUBLIC=1
+    __logw -- GLOBAL_CONFIG_VERIFY_PUBLIC
+fi
+__REGISTERED_VARIABLES+=(GLOBAL_CONFIG_VERIFY_PUBLIC)
 
 # debug?
 if [[ -z ${GLOBAL_DEBUG+x} || "${GLOBAL_DEBUG}x" == "x" ]]; then
@@ -177,7 +183,7 @@ fi
 __REGISTERED_VARIABLES+=(GLOBAL_DISTRIBUTION_VERSION_CODENAME)
 
 # Whatever distribution ids the distribution offers to get images
-if ! __test_variable_exists GLOBAL_DISTRIBUTION_VERSION_ID || __test_variable_empty GLOBAL_DISTRIBUTION_VERSION_ID; then
+if ! __variable_exists GLOBAL_DISTRIBUTION_VERSION_ID || __variable_empty GLOBAL_DISTRIBUTION_VERSION_ID; then
     declare GLOBAL_DISTRIBUTION_VERSION_ID="18.04"
     __logw -- GLOBAL_DISTRIBUTION_VERSION_ID
 fi
@@ -329,7 +335,7 @@ __REGISTERED_VARIABLES+=(GLOBAL_PUSH_PASSWORD_FILE)
 
 # the path where to put the script collection
 if [[ -z ${GLOBAL_STAGING_DIRECTORY+x} ]]; then
-    if __test_variable_exists __D_STAGING_DIRECTORY; then
+    if __variable_exists __D_STAGING_DIRECTORY; then
         if [[ "${__D_STAGING_DIRECTORY}x" != "x" ]]; then
             GLOBAL_STAGING_DIRECTORY="${__D_STAGING_DIRECTORY}"
         else

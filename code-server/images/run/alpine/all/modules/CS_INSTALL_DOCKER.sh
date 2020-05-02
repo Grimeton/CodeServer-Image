@@ -41,9 +41,9 @@ function __isenabled_cs_install_docker() {
         true
     elif [[ "${__D_C_INSTALL_DOCKER}x" == "x" ]]; then
         __ID_DEFAULT=""
-    elif __test_variable_text __D_C_INSTALL_DOCKER 1; then
+    elif __variable_text __D_C_INSTALL_DOCKER 1; then
         __ID_DEFAULT="1"
-    elif __test_varible_text __D_C_INSTALL_DOCKER 0; then
+    elif __variable_text __D_C_INSTALL_DOCKER 0; then
         __ID_DEFAULT=""
     fi
 
@@ -59,9 +59,9 @@ function __isenabled_cs_install_docker() {
         true
     elif [[ "${__D_C_INSTALL_DOCKER_SOCKET_ENFORCE}x" == "x" ]]; then
         __ID_SOCKET_ENFORCE=""
-    elif __test_variable_text __D_C_INSTALL_DOCKER_SOCKET_ENFORCE 1; then
+    elif __variable_text __D_C_INSTALL_DOCKER_SOCKET_ENFORCE 1; then
         __ID_SOCKET_ENFORCE="1"
-    elif __test_variable_text __D_C_INSTALL_DOCKER_SOCKET_ENFORCE 0; then
+    elif __variable_text __D_C_INSTALL_DOCKER_SOCKET_ENFORCE 0; then
         __ID_SOCKET_ENFORCE=""
     fi
 
@@ -73,9 +73,9 @@ function __isenabled_cs_install_docker() {
         true
     elif [[ "${CS_INSTALL_DOCKER}x" == "x" ]]; then
         true
-    elif __test_variable_text CS_INSTALL_DOCKER 1; then
+    elif __variable_text CS_INSTALL_DOCKER 1; then
         __SETTINGS[CS_INSTALL_DOCKER]="1"
-    elif __test_variable_text CS_INSTALL_DOCKER 0; then
+    elif __variable_text CS_INSTALL_DOCKER 0; then
         __SETTINGS[CS_INSTALL_DOCKER]=""
     fi
 
@@ -89,9 +89,9 @@ function __isenabled_cs_install_docker() {
 
     if [[ -z ${CS_INSTALL_DOCKER_SOCKET_ENFORCE+x} ]]; then
         true
-    elif __test_variable_text CS_INSTALL_DOCKER_SOCKET_ENFORCE 1; then
+    elif __variable_text CS_INSTALL_DOCKER_SOCKET_ENFORCE 1; then
         __SETTINGS[CS_INSTALL_DOCKER_SOCKET_ENFORCE]="1"
-    elif __test_variable_text CS_INSTALL_DOCKER_SOCKET_ENFORCE 0; then
+    elif __variable_text CS_INSTALL_DOCKER_SOCKET_ENFORCE 0; then
         __SETTINGS[CS_INSTALL_DOCKER_SOCKET_ENFORCE]=""
     fi
 

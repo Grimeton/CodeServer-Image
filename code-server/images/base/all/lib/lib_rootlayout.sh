@@ -113,7 +113,7 @@ fi
 #   - >0 on failure.
 #
 function __rootlayout_init() {
-    if __test_variable_exists "__ROOTLAYOUT_BASEDIRECTORY"; then
+    if __variable_exists "__ROOTLAYOUT_BASEDIRECTORY"; then
         __log e -- "Current rootlayout session still runng. Layout directory: '${__ROOTLAYOUT_BASEDIRECTORY}'.\n"
         return 111
     else
@@ -131,7 +131,7 @@ function __rootlayout_init() {
         fi
     fi
 
-    if __test_variable_exists "__ROOTLAYOUT_ROOTDIRECTORY"; then
+    if __variable_exists "__ROOTLAYOUT_ROOTDIRECTORY"; then
         if unset __ROOTLAYOUT_ROOTDIRECTORY; then
             true
         else
@@ -912,7 +912,7 @@ function __rootlayout_copy_staging_directory() {
 #   - >0 on failure.
 #
 function __rootlayout_destroy() {
-    if __test_variable_exists "__ROOTLAYOUT_BASEDIRECTORY"; then
+    if __variable_exists "__ROOTLAYOUT_BASEDIRECTORY"; then
         if [[ -d "${__ROOTLAYOUT_BASEDIRECTORY}" ]]; then
             if rm -rf "${__ROOTLAYOUT_BASEDIRECTORY}"; then
                 true
@@ -929,7 +929,7 @@ function __rootlayout_destroy() {
         fi
     fi
 
-    if __test_variable_exists "__ROOTLAYOUT_ROOTDIRECTORY"; then
+    if __variable_exists "__ROOTLAYOUT_ROOTDIRECTORY"; then
         if [[ -d "${__ROOTLAYOUT_ROOTDIRECTORY}" ]]; then
             if rm -rf "${__ROOTLAYOUT_ROOTDIRECTORY}"; then
                 true

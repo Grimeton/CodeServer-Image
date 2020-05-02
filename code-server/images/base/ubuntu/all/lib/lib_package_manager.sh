@@ -54,7 +54,7 @@ function __pm_cache_update() {
     declare -i __T_LAST_CHANGE=${__T_NOW}
     declare -i __T_DIFF=0
 
-    if __test_variable_exists __PM_CACHE_UPDATE && [[ "${FUNCNAME[1]}" == "__pm_ready" ]]; then
+    if __variable_exists __PM_CACHE_UPDATE && [[ "${FUNCNAME[1]}" == "__pm_ready" ]]; then
         while read __T_LINE; do
             if [[ -f "${__T_LINE}" ]]; then
                 __T_LAST_CHANGE=$(stat -c '%Z' "${__T_LINE}")
@@ -78,7 +78,7 @@ function __pm_cache_update() {
 
 }
 function __pm_exists() {
-    if __test_variable_exists __PM_INIT_ERROR; then
+    if __variable_exists __PM_INIT_ERROR; then
         return 101
     elif [[ -z ${__PM_INIT+x} ]]; then
         return 102
@@ -479,7 +479,7 @@ function __pm_package_install_needed() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
-    elif __test_array_exists "${@:1:1}"; then
+    elif __array_exists "${@:1:1}"; then
         declare -n __T_PPNEI_PACKAGES_NOT_INSTALLED_AVAILABLE="${@:1:1}"
         declare -a __T_PPNEI_PACKAGES_TO_INSTALL=("${@:2}")
     else
@@ -548,7 +548,7 @@ function __pm_package_installed_not() {
 
     if [[ "${@:1:1}x" == "x" ]]; then
         return 101
-    elif __test_array_exists "${@:1:1}"; then
+    elif __array_exists "${@:1:1}"; then
         declare -n __T_PPNI_PACKAGES_NOT_INSTALLED="${@:1:1}"
         declare -a __P_PACKAGES=("${@:2}")
     else

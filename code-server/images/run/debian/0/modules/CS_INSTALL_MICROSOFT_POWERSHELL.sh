@@ -34,10 +34,10 @@ fi
 
 function __isenabled_install_microsoft_powershell() {
 
-    if __test_variable_exists CS_INSTALL_MICROSOFT_POWERSHELL; then
-        if __test_variable_empty CS_INSTALL_MICROSOFT_POWERSHELL; then
+    if __variable_exists CS_INSTALL_MICROSOFT_POWERSHELL; then
+        if __variable_empty CS_INSTALL_MICROSOFT_POWERSHELL; then
             true
-        elif __test_variable_text_true CS_INSTALL_MICROSOFT_POWERSHELL; then
+        elif __variable_text CS_INSTALL_MICROSOFT_POWERSHELL 1; then
             __log i -- "(CS_INSTALL_MICROSOFT_POWERSHELL) This feature is not available on Debian/Sid."
         fi
     fi

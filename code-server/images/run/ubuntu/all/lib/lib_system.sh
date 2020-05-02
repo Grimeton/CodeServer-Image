@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -31,6 +31,7 @@ if ! (return 0 2>/dev/null); then
     echo "THIS IS A LIBRARY FILE AND SHOULD NOT BE CALLED DIRECTLY. '($(realpath "${0}"))'"
     exit 254
 fi
+__lib_require "base_variable"
 
 function __group_id_get() {
 
@@ -42,7 +43,7 @@ function __group_id_get() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
     else
         declare __T_RETURN_VALUE=""
@@ -136,8 +137,8 @@ function __group_id_next() {
     fi
 
     if [[ "${@:1:1}x" == "x" ]]; then
-        declare -i __T_RETURN_VALUE=0
-    elif __test_variable_exists "${@:1:1}"; then
+        d__variable_existsALUE=0
+    elif __variable_exists "${@:1:1}"; then
         declare -n __T_RETURN_VALUE="${@:1:1}"
     else
         declare -i __T_RETURN_VALUE=0
@@ -205,6 +206,47 @@ function __group_id_next() {
     return 254
 
 }
+function __group_members_get() {
+
+    if __group_exists "${@:1:1}"; then
+        declare __P_GROUP="${@:1:1}"
+    else
+        return 101
+    fi
+
+    if __array_exists "${@:2:1}"; then
+        declare -n __T_RETURN_VALUE="${@:2:1}"
+    else
+        declare -a __T_RETURN_VALUE=()
+    fi
+
+    declare -a __GINFO=()
+    declare __T_RESULT=""
+    if __T_RESULT="$(getent group "${__P_GROUP}")"; then
+
+        IFS=":" read -ra __GINFO <<<"${__T_RESULT}"
+        unset IFS
+
+        if [[ ${#__GINFO[@]} -lt 4 ]]; then
+            __T_RETURN_VALUE=()
+        else
+
+            IFS="," read -ra __T_RETURN_VALUE <<<"${__GINFO[3]}"
+            unset IFS
+
+        fi
+
+        if [[ ${#__T_RETURN_VALUE[@]} -gt 0 ]]; then
+            if [[ ! -R __T_RETURN_VALUE ]]; then
+                echo "${__T_RETURN_VALUE[@]}"
+            fi
+        fi
+        return 0
+    else
+        return $?
+    fi
+    return 254
+}
 function __group_name_exists() {
     __group_exists "${@}"
 }
@@ -217,8 +259,8 @@ function __group_name_get() {
     fi
 
     if [[ "${@:2:1}x" == "x" ]]; then
-        declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:2:1}"; then
+        d__variable_existsE=""
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
     else
         declare __T_RETURN_VALUE=""
@@ -283,8 +325,105 @@ function __user_exists() {
     fi
 
 }
+function __user_group_id_get() {
+    declare __P_USER=""
+    if __user_name_get "${@:1:1}" __P_USER; then
+        true
+    else
+        return 101
+    fi
+
+    if __variable_exists "${@:2:1}"; then
+        declare -n __T_RETURN_VALUE="${@:2:1}"
+    else
+        declare __T_RETURN_VALUE=""
+    fi
+
+    __T_RETURN_VALUE=""
+
+    declare -a __T_UINFO=()
+    declare __T_RESULT=""
+    if __T_RESULT="$(getent passwd "${__P_USER}")"; then
+        IFS=":" read -ra __T_UINFO <<<"${__T_RESULT}"
+        unset IFS
+        if [[ ${#__T_UINFO[@]} -ne 7 ]]; then
+            return 121
+        fi
+
+        __T_RETURN_VALUE="${__T_UINFO[3]}"
+
+        if [[ ! -R __T_RETURN_VALUE ]]; then
+            echo "${__T_RETURN_VALUE}"
+        fi
+
+        return 0
+    else
+        return $?
+    fi
+
+    return 254
+}
+function __user_group_member() {
+
+    declare __P_USER=""
+    declare __P_GROUP=""
+
+    if __user_name_get "${@:1:1}" __P_USER; then
+        true
+    else
+        return 101
+    fi
+
+    if __group_name_get "${@:2:1}" __P_GROUP; then
+        true
+    else
+        return 102
+    fi
+
+    declare -a __T_GROUPMEMBERS=()
+    if __group_members_get "${__P_GROUP}" __T_GROUPMEMBERS; then
+        true
+    else
+        return 111
+    fi
+
+    if __array_contains __T_GROUPMEMBERS "${__P_USER}"; then
+        return 0
+    else
+        return 1
+    fi
+    return 254
+
+}
 function __user_id_exists() {
     __user_exists "${@}"
+}
+function __user_id_get() {
+
+    if [[ "${@:1:1}x" == "x" ]]; then
+        return 101
+    else
+        declare __P_USERNAME="${@:1:1}"
+    fi
+
+    if __variable_exists "${@:2:1}"; then
+        declare -n __T_RETURN_VALUE="${@:2:1}"
+    else
+        declare __T_RETURN_VALUE=""
+    fi
+    __T_RETURN_VALUE=""
+    declare -a __UINFO=()
+    declare __T_RES=""
+    if __T_RES="$(getent passwd "${__P_USERNAME}")"; then
+        IFS=":" read -ra __UINFO <<<"${__T_RES}"
+        if [[ -R __T_RETURN_VALUE ]]; then
+            __T_RETURN_VALUE="${__UINFO[2]}"
+        else
+            echo "${__UINFO[2]}"
+        fi
+        return 0
+    fi
+    return 1
 }
 function __user_id_next() {
     declare __UIN_REGEX_UID='^[0-9]{4,5}$'
@@ -317,8 +456,8 @@ function __user_id_next() {
     fi
 
     if [[ "${@:1:1}x" == "x" ]]; then
-        declare -i __T_RETURN_VALUE=0
-    elif __test_variable_exists "${@:1:1}"; then
+        d__variable_existsALUE=0
+    elif __variable_exists "${@:1:1}"; then
         declare -n __T_RETURN_VALUE="${@:1:1}"
     else
         declare -i __T_RETURN_VALUE=0
@@ -423,4 +562,36 @@ function __user_mod() {
 }
 function __user_name_exists() {
     __user_exists "${@}"
+}
+function __user_name_get() {
+
+    if ! __user_exists "${@:1:1}"; then
+        return 101
+    else
+        declare __P_USERID="${@:1:1}"
+    fi
+
+    if [[ "${@:2:1}x" == "x" ]]; then
+        declare __T_RETURN_VALUE=""
+    elif __variable_exists "${@:2:1}"; then
+        declare -n __T_RETURN_VALUE="${@:2:1}"
+    else
+        declare __T_RETURN_VALUE=""
+    fi
+    __T_RETURN_VALUE=""
+    declare __T_RES=""
+    declare -a __UINFO=()
+    if __T_RES="$(getent passwd "${__P_USERID}")"; then
+        IFS=":" read -ra __UINFO <<<"${__T_RES}"
+        unset IFS
+        if [[ -R __T_RETURN_VALUE ]]; then
+            __T_RETURN_VALUE="${__UINFO[0]}"
+        else
+            echo "${__UINFO[0]}"
+        fi
+        return 0
+    fi
+
+    return 1
+
 }

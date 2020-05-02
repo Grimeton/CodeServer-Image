@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -35,15 +35,27 @@ fi
 # DO NOT MESS WITH THIS.
 # REALLY I MEAN IT.
 set -o nounset
+__lib_require "base_aarray"
+# export library specific for all scripts.
+declare -gx __CONFIG_LOADED=1
+declare -agx __CONFIG_DISTRIBUTIONS_SUPPORTED_IDS=()
 
 if ([[ -z ${GLOBAL_DISTRIBUTIONS_SUPPORTED_IDS[@]+x} ]] || [[ ${GLOBAL_DISTRIBUTIONS_SUPPORTED_IDS[@]} -lt 1 ]]); then
     if ([[ -z ${__D_DISTRIBUTIONS_SUPPORTED_IDS[@]+x} ]] || [[ ${#__D_DISTRIBUTIONS_SUPPORTED_IDS[@]} -lt 1 ]]); then
-        declare -ag __CONFIG_DISTRIBUTIONS_SUPPORTED_IDS=()
+        true
     else
-        declare -ag __CONFIG_DISTRIBUTIONS_SUPPORTED_IDS=("${__D_DISTRIBUTIONS_SUPPORTED_IDS[@]}")
+        for __T_AARRAYNAME in "${__D_DISTRIBUTIONS_SUPPORTED_IDS[@]}"; do
+            if __aarray_exists "${__T_AARRAYNAME}"; then
+                __CONFIG_DISTRIBUTIONS_SUPPORTED_IDS+=("${__T_AARRAYNAME}")
+            fi
+        done
     fi
 else
-    declare -ag __CONFIG_DISTRIBUTIONS_SUPPORTED_IDS=("${GLOBAL_DISTRIBUTIONS_SUPPORTED_IDS[@]}")
+    for __T_AARRAYNAME in "${GLOBAL_DISTRIBUTIONS_SUPPORTED_IDS[@]}"; do
+        if __aarray_exists "${__T_AARRAYNAME}"; then
+            __CONFIG_DISTRIBUTIONS_SUPPORTED_IDS+=("${__T_AARRAYNAME}")
+        fi
+    done
 fi
 
 #####
@@ -491,7 +503,7 @@ function __config_distribution_get_dockerfile() {
 
     if [[ "${@:5:1}x" == "x" ]]; then
         declare __T_LAST_FOUND_FILE=""
-    elif __test_variable_exists "${@:5:1}"; then
+    elif __variable_exists "${@:5:1}"; then
         declare -n __T_LAST_FOUND_FILE="${@:5:1}"
         __T_LAST_FOUND_FILE=""
     else

@@ -191,7 +191,7 @@ EOF
 declare -grx __D_LIB_DEFAULT_HEADER
 
 # the packages library should ALWAYS load on init, no matter what.
-declare -agrx __D_LIB_PACKAGES_INIT=("base_dummies" "base_array" "base_aarray" "base_trap" "base_test" "base_log" "base_environment" "base_config")
+declare -agrx __D_LIB_PACKAGES_INIT=("base_config" "base_dummies" "base_aarray" "base_array" "base_environment" "base_log" "base_trap")
 
 #
 # - END: Library defaults
@@ -275,7 +275,7 @@ declare -grx __D_MICROSOFT_PACKAGELISTS_REPOSITORY_REGEX='^(prod|islow|ifast)(|:
 # - Regular expressions
 #
 # the regex to test if a text value is false
-declare -grx __D_TEXT_REGEX_FALSE='^(0|disabled|false|no|none)$'
+declare -grx __D_TEXT_REGEX_FALSE='^(0|disable|disabled|false|no|none)$'
 
 # the regex to test if a text is a number
 declare -grx __D_TEXT_REGEX_NUMBER='^[0-9]+$'
@@ -285,7 +285,7 @@ declare -grx __D_TEXT_REGEX_NUMBER='^[0-9]+$'
 declare -grx __D_TEXT_REGEX_NUMBER_NO_LEADING_ZEROES='^([^1-9]+)?([0-9]+)$'
 
 # the regex to test if a text value is true
-declare -grx __D_TEXT_REGEX_TRUE='^(1|enabled|true|yes)$'
+declare -grx __D_TEXT_REGEX_TRUE='^(1|any|enable|enabled|true|yes)$'
 
 #
 # - END: Regular expressions

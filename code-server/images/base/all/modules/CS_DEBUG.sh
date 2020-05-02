@@ -41,9 +41,9 @@ function __isenabled_cs_debug() {
         true
     elif [[ "${__D_C_DEBUG}x" == "x" ]]; then
         declare __CSD_DEFAULT=""
-    elif __test_variable_text __D_C_DEBUG 1; then
+    elif __variable_text __D_C_DEBUG 1; then
         declare __CSD_DEFAULT="1"
-    elif __test_variable_text __D_C_DEBUG 0; then
+    elif __variable_text __D_C_DEBUG 0; then
         declare __CSD_DEFAULT=""
     fi
 
@@ -53,9 +53,9 @@ function __isenabled_cs_debug() {
         true
     elif [[ "${CS_DEBUG}x" == "x" ]]; then
         __SETTINGS[DEBUG]="${__CSD_DEFAULT}"
-    elif __test_variable_text CS_DEBUG 1; then
+    elif __variable_text CS_DEBUG 1; then
         __SETTINGS[DEBUG]="1"
-    elif __test_variable_text CS_DEBUG 0; then
+    elif __variable_text CS_DEBUG 0; then
         __SETTINGS[DEBUG]=""
     fi
 

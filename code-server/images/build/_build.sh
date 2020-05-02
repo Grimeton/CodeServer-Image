@@ -161,7 +161,7 @@ unset __T_ERROR
 __log_banner i -- "BEGIN: STARTING BUILD!"
 declare -i __T_ERROR=0
 for __T_FUNC in "__build_before_before" "__build_before" "__build_prepare" "__build" "__build_after" "__build_package" "__build_after_after"; do
-    if __test_function_exists "${__T_FUNC}"; then
+    if __variable_type_function "${__T_FUNC}"; then
         __log_banner i -- "START: '${__T_FUNC}'"
         __log i -- "Running function '${__T_FUNC}'.\n"
         if ${__T_FUNC}; then
@@ -249,40 +249,43 @@ else
 fi
 
 declare -ga __GLOBAL_PUBLIC_TAGS=()
-declare __T_CONFIG_VERIFY_PUBLIC_FILE=""
-if __lib_file_get_full_path "config_verify_public" "__T_CONFIG_VERIFY_PUBLIC_FILE" "${ID}" "${VERSION_ID}" "base" "run"; then
-    true
-else
-    __log e -- "Problems getting the full file path of 'config_verify_public'...($?).\n"
-    exit 141
-fi
+if __variable_text GLOBAL_CONFIG_VERIFY_PUBLIC 1; then
 
-if [[ -f "${__T_CONFIG_VERIFY_PUBLIC_FILE}" ]]; then
-    if [[ -f "${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}-${__CONFIG[RUN_BUILDVERSION_SUFFIX]}/public_tags.sh" ]]; then
-        __T_PUBLIC_TAGS_FILE="${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}-${__CONFIG[RUN_BUILDVERSION_SUFFIX]}/public_tags.sh"
-    elif [[ -f "${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}/public_tags.sh" ]]; then
-        __T_PUBLIC_TAGS_FILE="${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}/public_tags.sh"
+    declare __T_CONFIG_VERIFY_PUBLIC_FILE=""
+    if __lib_file_get_full_path "config_verify_public" "__T_CONFIG_VERIFY_PUBLIC_FILE" "${ID}" "${VERSION_ID}" "base" "run"; then
+        true
     else
-        __T_PUBLIC_TAGS_FILE=""
+        __log e -- "Problems getting the full file path of 'config_verify_public'...($?).\n"
+        exit 141
     fi
-    if [[ -f "${__T_PUBLIC_TAGS_FILE}" ]]; then
-        if source "${__T_PUBLIC_TAGS_FILE}"; then
-            if source "${__T_CONFIG_VERIFY_PUBLIC_FILE}"; then
-                __log i -- "Loaded and verified the public tags configuration.\n"
-                if [[ ${#GLOBAL_PUBLIC_TAGS[@]} -gt 0 ]]; then
-                    for __T_GPT in "${GLOBAL_PUBLIC_TAGS[@]}"; do
-                        __GLOBAL_PUBLIC_TAGS+=("${__T_GPT}")
-                    done
+
+    if [[ -f "${__T_CONFIG_VERIFY_PUBLIC_FILE}" ]]; then
+        if [[ -f "${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}-${__CONFIG[RUN_BUILDVERSION_SUFFIX]}/public_tags.sh" ]]; then
+            __T_PUBLIC_TAGS_FILE="${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}-${__CONFIG[RUN_BUILDVERSION_SUFFIX]}/public_tags.sh"
+        elif [[ -f "${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}/public_tags.sh" ]]; then
+            __T_PUBLIC_TAGS_FILE="${G_BASE_DIR}/configs/${__CONFIG[RUN_DISTRIBUTION_ID]}/${__CONFIG[RUN_DISTRIBUTION_VERSION_ID]}/public_tags.sh"
+        else
+            __T_PUBLIC_TAGS_FILE=""
+        fi
+        if [[ -f "${__T_PUBLIC_TAGS_FILE}" ]]; then
+            if source "${__T_PUBLIC_TAGS_FILE}"; then
+                if source "${__T_CONFIG_VERIFY_PUBLIC_FILE}"; then
+                    __log i -- "Loaded and verified the public tags configuration.\n"
+                    if [[ ${#GLOBAL_PUBLIC_TAGS[@]} -gt 0 ]]; then
+                        for __T_GPT in "${GLOBAL_PUBLIC_TAGS[@]}"; do
+                            __GLOBAL_PUBLIC_TAGS+=("${__T_GPT}")
+                        done
+                    fi
+                else
+                    __log e -- "Problems loading the public tags verifier.\n"
                 fi
             else
-                __log e -- "Problems loading the public tags verifier.\n"
+                __log e -- "Problems loading the public tags definition.\n"
             fi
-        else
-            __log e -- "Problems loading the public tags definition.\n"
         fi
+    else
+        __log e -- "Cannot find config verifier for public tags...\n"
     fi
-else
-    __log e -- "Cannot find config verifier for public tags...\n"
 fi
 
 ###
@@ -297,7 +300,7 @@ __T_DOCKER_ARGS+=("--file" "${__RUN_DOCKER_FILE}")
 __T_DOCKER_ARGS+=("--network" "host")
 __T_DOCKER_ARGS+=("${__RUN_TAG_IMAGE_NAME}")
 __T_DOCKER_ARGS+=("${__RUN_TAG_IMAGE_LATEST}")
-if __test_array_exists __GLOBAL_PUBLIC_TAGS; then
+if __array_exists __GLOBAL_PUBLIC_TAGS; then
     if [[ ${#__GLOBAL_PUBLIC_TAGS[@]} -gt 0 ]]; then
         for __GLOBAL_PUBLIC_TAG in "${__GLOBAL_PUBLIC_TAGS[@]}"; do
             __T_DOCKER_ARGS+=("--tag ${__GLOBAL_PUBLIC_TAG}")
@@ -319,15 +322,15 @@ if [[ -f "${__RUN_DOCKER_FILE}" ]]; then
             exit 0
         fi
 
-        if ! __test_variable_exists GLOBAL_PUBLIC_PUSH || __test_variable_empty GLOBAL_PUBLIC_PUSH; then
+        if ! __variable_exists GLOBAL_PUBLIC_PUSH || __variable_empty GLOBAL_PUBLIC_PUSH; then
             __log i -- "GLOBAL_PUBLIC_PUSH"
             exit 0
         fi
 
-        if ! __test_variable_exists GLOBAL_PUSH_PASSWORD_FILE; then
+        if ! __variable_exists GLOBAL_PUSH_PASSWORD_FILE; then
             __log i -- "GLOBAL_PUSH_PASSWORD_FILE - 1\n"
             exit 0
-        elif __test_variable_empty GLOBAL_PUSH_PASSWORD_FILE; then
+        elif __variable_empty GLOBAL_PUSH_PASSWORD_FILE; then
             __log i -- "GLOBAL_PUSH_PASSWORD_FILE - 2\n"
             exit 0
         elif [[ ! -f "${G_BASE_DIR}/.pushpasswd" ]]; then

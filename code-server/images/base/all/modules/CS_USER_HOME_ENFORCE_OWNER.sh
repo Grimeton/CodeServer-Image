@@ -42,9 +42,9 @@ function __isenabled_cs_user_home_enforce_owner() {
         true
     elif [[ "${__D_C_USER_HOME_ENFORCE_OWNER}x" == "x" ]]; then
         declare __FUHEO_DEFAULT=""
-    elif __test_variable_text __D_C_USER_HOME_ENFORCE_OWNER 1; then
+    elif __variable_text __D_C_USER_HOME_ENFORCE_OWNER 1; then
         declare __FUHEO_DEFAULT="1"
-    elif __test_variable_text __D_C_USER_HOME_ENFORCE_OWNER 0; then
+    elif __variable_text __D_C_USER_HOME_ENFORCE_OWNER 0; then
         declare __FUHEO_DEFAULT=""
     fi
 
@@ -54,9 +54,9 @@ function __isenabled_cs_user_home_enforce_owner() {
         true
     elif [[ "${CS_USER_HOME_ENFORCE_OWNER}x" == "x" ]]; then
         true
-    elif __test_variable_text CS_USER_HOME_ENFORCE_OWNER 1; then
+    elif __variable_text CS_USER_HOME_ENFORCE_OWNER 1; then
         __SETTINGS[USER_HOME_ENFORCE_OWNER]="1"
-    elif __test_variable_text CS_USER_HOME_ENFORCE_OWNER 0; then
+    elif __variable_text CS_USER_HOME_ENFORCE_OWNER 0; then
         __SETTINGS[USER_HOME_ENFORCE_OWNER]=""
     fi
 

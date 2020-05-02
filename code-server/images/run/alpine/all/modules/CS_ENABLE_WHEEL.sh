@@ -32,8 +32,8 @@ if ! (return 0 2>/dev/null); then
     exit 254
 fi
 function __isenabled_cs_enable_wheel() {
-    if __test_variable_exists CS_ENABLE_WHEEL; then
-        if __test_variable_empty CS_ENABLE_WHEEL; then
+    if __variable_exists CS_ENABLE_WHEEL; then
+        if __variable_empty CS_ENABLE_WHEEL; then
             true
         else
             __log i - "(CS_ENABLE_WHEEL) The wheel feature is not supported on Alpine Linux."

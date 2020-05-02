@@ -1,4 +1,5 @@
 CodeServer container based on the latest release from the official [CodeServer Github Repository](https://github.com/cdr/code-server).
+# Table of contents
 
 # License and Warning
 Copyright (c) 2020, <grimeton@gmx.net>
@@ -75,22 +76,22 @@ You get: "build-0.01-ubuntu-18.04-3.2.0-fd36a99-release".
 ## Image Tags (short)
 To make it easier, each image also comes with a shorter tag as follows:
 
-Distribution | Architecture | Base Image Tag| Latest (HEAD) | Latest Release
--|-|-|-|-
-Alpine 3.10| amd64 | alpine:3.10 | alpine-3.10-latest | alpine-3.10-latest-release
-Alpine 3.11| amd64 | alpine:3.11| alpine-3.11-latest | alpine-3.11-latest-release
-Debian 8 | amd64 | debian:8 | debian-8-latest | debian-8-latest-release
-Debian 9 | amd64 | debian:9 | debian-9-latest | debian-9-latest-release
-Debian 10 | amd64 | debian:10 | debian-10-latest | debian-10-latest-release
-Debian Sid* | amd64 | debian:sid | debian-0-latest | debian-0-latest-release
-Debian 8-slim | amd64 | debian:8-slim | debian-8-slim-latest | debian-8-slim-latest-release
-Debian 9-slim | amd64 | debian:9-slim | debian-9-slim-latest | debian-9-slim-latest-release
-Debian 10-slim | amd64 | debian:10-slim | debian-10-slim-latest | debian-10-slim-latest-release
-Debian Sid-slim* | amd64 | debian:sid-slim | debian-0-slim-latest | debian-0-slim-latest-release
-Ubuntu 16.04 | amd64 | ubuntu:16.04 | ubuntu-16.04-latest | ubuntu-16.04-latest-release
-Ubuntu 18.04 | amd64 | ubuntu:18.04 | ubuntu-18.04-latest | ubuntu-18.04-latest-release
-Ubuntu 19.10 | amd64 | ubuntu:19.10 | ubuntu-19.10-latest | ubuntu-19.10-latest-release
-Ubuntu 20.04 | amd64 | ubuntu:20.04 | ubuntu-20.04-latest | ubuntu-20.04-latest-release
+| Distribution     | Architecture | Base Image Tag  | Latest (HEAD)         | Latest Release                |
+| ---------------- | ------------ | --------------- | --------------------- | ----------------------------- |
+| Alpine 3.10      | amd64        | alpine:3.10     | alpine-3.10-latest    | alpine-3.10-latest-release    |
+| Alpine 3.11      | amd64        | alpine:3.11     | alpine-3.11-latest    | alpine-3.11-latest-release    |
+| Debian 8         | amd64        | debian:8        | debian-8-latest       | debian-8-latest-release       |
+| Debian 9         | amd64        | debian:9        | debian-9-latest       | debian-9-latest-release       |
+| Debian 10        | amd64        | debian:10       | debian-10-latest      | debian-10-latest-release      |
+| Debian Sid*      | amd64        | debian:sid      | debian-0-latest       | debian-0-latest-release       |
+| Debian 8-slim    | amd64        | debian:8-slim   | debian-8-slim-latest  | debian-8-slim-latest-release  |
+| Debian 9-slim    | amd64        | debian:9-slim   | debian-9-slim-latest  | debian-9-slim-latest-release  |
+| Debian 10-slim   | amd64        | debian:10-slim  | debian-10-slim-latest | debian-10-slim-latest-release |
+| Debian Sid-slim* | amd64        | debian:sid-slim | debian-0-slim-latest  | debian-0-slim-latest-release  |
+| Ubuntu 16.04     | amd64        | ubuntu:16.04    | ubuntu-16.04-latest   | ubuntu-16.04-latest-release   |
+| Ubuntu 18.04     | amd64        | ubuntu:18.04    | ubuntu-18.04-latest   | ubuntu-18.04-latest-release   |
+| Ubuntu 19.10     | amd64        | ubuntu:19.10    | ubuntu-19.10-latest   | ubuntu-19.10-latest-release   |
+| Ubuntu 20.04     | amd64        | ubuntu:20.04    | ubuntu-20.04-latest   | ubuntu-20.04-latest-release   |
 
 '*' 'Debian/Sid' is not marked with a version number anywhere, so I picked '0' as version number. To use the 'Debian/Sid' images use the 'debian-0' prefix and remember: (S)id (I)s (D)angerous!
 
@@ -201,7 +202,7 @@ Variables that support this features will be marked.
 Some variables can hold strings, e.g. CS_INSTALL_ADDITIONAL_PACKAGES can contain a string of multiple package names separated by space, that should be installed during the first container initialization. One must use a single string with space separated package names, arrays are not supported.
 
 # List of Variables
-## - CS_DEBUG
+## CS_DEBUG
 ### Description 
 As the name suggests, this variable is used to enable the debug feature of the init script system. 
 
@@ -270,24 +271,28 @@ When enabled the following things are going to happen:
 * Checks if the group "docker" already exists. If not, creates the group with the GID of the socket found at 'CS_INSTALL_DOCKER_SOCKET'.
 * Installs the necessary distribution packages to make docker work inside the container.
 * Adds CodeServer's user to the docker group, to make docker usable as non-root user directly from CodeServer.
+
 ### Type
 Boolean - Accepts "True"- and "False"-values.
+
 ### Default
 Empty/Disabled.
+
 ### Packages
 The following packages will be installed when the option is enabled:
-Distribution | Version | Packages | Repository
--|-|-|-
-Alpine|3.10|docker-cli|Default
-Alpine|3.11|docker-cli|Default
-Debian|8|docker-ce|Docker Repository for Debian
-Debian|9|docker-ce-cli|Docker Repository for Debian
-Debian|10|docker docker-compose|Default
-Debian|0/Sid|docker docker-compose|Default
-Ubuntu|16.04|docker.io docker-compose|Default
-Ubuntu|18.04|docker.io docker-compose|Default
-Ubuntu|19.10|docker.io docker-compose|Default
-Ubuntu|20.04|docker.io docker-compose|Default
+
+| Distribution | Version | Packages                 | Repository                   |
+| ------------ | ------- | ------------------------ | ---------------------------- |
+| Alpine       | 3.10    | docker-cli               | Default                      |
+| Alpine       | 3.11    | docker-cli               | Default                      |
+| Debian       | 8       | docker-ce                | Docker Repository for Debian |
+| Debian       | 9       | docker-ce-cli            | Docker Repository for Debian |
+| Debian       | 10      | docker docker-compose    | Default                      |
+| Debian       | 0/Sid   | docker docker-compose    | Default                      |
+| Ubuntu       | 16.04   | docker.io docker-compose | Default                      |
+| Ubuntu       | 18.04   | docker.io docker-compose | Default                      |
+| Ubuntu       | 19.10   | docker.io docker-compose | Default                      |
+| Ubuntu       | 20.04   | docker.io docker-compose | Default                      |
 
 ## - CS_INSTALL_DOCKER_SOCKET
 ### Description
@@ -296,6 +301,10 @@ The socket that should be used to connect to docker. You have to mount the socke
 String - Accepts full path to the docker socket INSIDE of the container.
 ### Default
 Empty/Not set.
+
+## - CS_FOO_BAR
+### Description
+Some bla some ble
 
 ## - CS_INSTALL_MICROSOFT_DOTNET_SDK
 ### Description
@@ -309,10 +318,8 @@ When the variable contains a package name, then the package suggested in the var
 
 ### Type
 Boolean WITH PACKAGENAME - Accepts "True"-, "False"-values as well as a package name to install.
-
 ### Default
 Empty/Off
-
 ### Packages
 Installs either the default or the suggested package and its dependencies.
 
@@ -320,18 +327,18 @@ Installs either the default or the suggested package and its dependencies.
 Installs the Microsoft Package Repository available at [https://packages.microsoft.com](https://packages.microsoft.com).
 
 ### Supported Distributions
-Distribution|Version|Supported
--|-|-
-Alpine|3.10|No
-Alpine|3.11|No
-Debian|8|Yes
-Debian|9|Yes
-Debian|10|Yes
-Debian|0/Sid|Yes
-Ubuntu|16.04|Yes
-Ubuntu|18.04|Yes
-Ubuntu|19.10|No
-Ubuntu|20.04|No
+| Distribution | Version | Supported |
+| ------------ | ------- | --------- |
+| Alpine       | 3.10    | No        |
+| Alpine       | 3.11    | No        |
+| Debian       | 8       | Yes       |
+| Debian       | 9       | Yes       |
+| Debian       | 10      | Yes       |
+| Debian       | 0/Sid   | Yes       |
+| Ubuntu       | 16.04   | Yes       |
+| Ubuntu       | 18.04   | Yes       |
+| Ubuntu       | 19.10   | No        |
+| Ubuntu       | 20.04   | No        |
 
 ## - CS_INSTALL_MICROSOFT_POWERSHELL
 ### Description
@@ -345,18 +352,18 @@ Installs either the default or the suggested package and its dependencies.
 ### Repositories
 Installs the Microsoft Package Repository available at [https://packages.microsoft.com](https://packages.microsoft.com).
 ### Supported Distributions
-Distribution|Version|Supported
--|-|-
-Alpine|3.10|No
-Alpine|3.11|No
-Debian|8|Yes
-Debian|9|Yes
-Debian|10|Yes
-Debian|0/Sid|Yes
-Ubuntu|16.04|Yes
-Ubuntu|18.04|Yes
-Ubuntu|19.10|No
-Ubuntu|20.04|No
+| Distribution | Version | Supported |
+| ------------ | ------- | --------- |
+| Alpine       | 3.10    | No        |
+| Alpine       | 3.11    | No        |
+| Debian       | 8       | Yes       |
+| Debian       | 9       | Yes       |
+| Debian       | 10      | Yes       |
+| Debian       | 0/Sid   | Yes       |
+| Ubuntu       | 16.04   | Yes       |
+| Ubuntu       | 18.04   | Yes       |
+| Ubuntu       | 19.10   | No        |
+| Ubuntu       | 20.04   | No        |
 
 
 In case of Ubuntu only LTS releases are supported with a Powershell package. If you have a non-LTS version or a newer version as the current, official LTS, then you need to use a Snapcraft image of [Powershell](https://snapcraft.io/powershell). Sadly this is total overkill inside a container and requires so many changes to container security that it becomes completely pointless to use.
@@ -380,33 +387,33 @@ Boolean - Accepts "True"- and "False-values.
 Off/Empty
 ### Packages
 When enabled, installs the following packages:
-Distribution|Version|Packages|Repository
--|-|-|-
-Debian|8|apt-transport-https ca-certificates curl gnupg2|Default
-Debian|9|apt-transport-https ca-certificates curl gnupg2|Default
-Debian|10|apt-transport-https ca-certificates curl gnupg2|Default
-Debian|0/Sid|apt-transport-https ca-certificates curl gnupg2|Default
-Ubuntu|16.04|apt-transport-https ca-certificates curl gnupg2|Default
-Ubuntu|18.04|apt-transport-https ca-certificates curl gnupg2|Default
-Ubuntu|19.10|apt-transport-https ca-certificates curl gnupg2|Default
-Ubuntu|20.04|apt-transport-https ca-certificates curl gnupg2|Default
+| Distribution | Version | Packages                                        | Repository |
+| ------------ | ------- | ----------------------------------------------- | ---------- |
+| Debian       | 8       | apt-transport-https ca-certificates curl gnupg2 | Default    |
+| Debian       | 9       | apt-transport-https ca-certificates curl gnupg2 | Default    |
+| Debian       | 10      | apt-transport-https ca-certificates curl gnupg2 | Default    |
+| Debian       | 0/Sid   | apt-transport-https ca-certificates curl gnupg2 | Default    |
+| Ubuntu       | 16.04   | apt-transport-https ca-certificates curl gnupg2 | Default    |
+| Ubuntu       | 18.04   | apt-transport-https ca-certificates curl gnupg2 | Default    |
+| Ubuntu       | 19.10   | apt-transport-https ca-certificates curl gnupg2 | Default    |
+| Ubuntu       | 20.04   | apt-transport-https ca-certificates curl gnupg2 | Default    |
 
 ### Repositories
 Installs Microsoft's official repository.
 
 ### Supported Distributions
-Distribution|Version|Supported
--|-|-
-Alpine|3.10|No
-Alpine|3.11|No
-Debian|8|Yes
-Debian|9|Yes
-Debian|10|Yes
-Debian|0/Sid|Yes
-Ubuntu|16.04|Yes
-Ubuntu|18.04|Yes
-Ubuntu|19.10|Yes
-Ubuntu|20.04|Yes
+| Distribution | Version | Supported |
+| ------------ | ------- | --------- |
+| Alpine       | 3.10    | No        |
+| Alpine       | 3.11    | No        |
+| Debian       | 8       | Yes       |
+| Debian       | 9       | Yes       |
+| Debian       | 10      | Yes       |
+| Debian       | 0/Sid   | Yes       |
+| Ubuntu       | 16.04   | Yes       |
+| Ubuntu       | 18.04   | Yes       |
+| Ubuntu       | 19.10   | Yes       |
+| Ubuntu       | 20.04   | Yes       |
 
 ## - CS_LISTEN_HOST
 ### Description
@@ -556,11 +563,11 @@ When using the default type "pkg" and the system is not able to install the repo
 The package's installation types and their tags:
 
 
-Repository type|Repository Prefix|Package|Enforce Package Only|Source
--|-|-|-|-
-Production|prod|pkg|fpkg|source
-Insiders Slow|islow|pkg|fpkg|source
-Insiders Fast|ifast|pkg|fpkg|source
+| Repository type | Repository Prefix | Package | Enforce Package Only | Source |
+| --------------- | ----------------- | ------- | -------------------- | ------ |
+| Production      | prod              | pkg     | fpkg                 | source |
+| Insiders Slow   | islow             | pkg     | fpkg                 | source |
+| Insiders Fast   | ifast             | pkg     | fpkg                 | source |
 ### Supported Distributions
 Check 'CS_INSTALL_MICROSOFT_PACKAGELISTS' for a list of supported distributions.
 
@@ -574,18 +581,18 @@ Empty/Not Set
 ### Packages
 When enabled, pulls in a package that contains the locale data so that locales can be generated and configured. This is not directly supported on Alpine Linux as musl libc's locale implementation is non existant. One can install glibc but that's beyond the scope of the setup script.
 
-Distribution|Version|Packages|Repository
--|-|-|-
-Alpine|3.10|N/A|N/A
-Alpine|3.11|N/A|N/A
-Debian|8|locales|Default
-Debian|9|locales|Default
-Debian|10|locales|Default
-Debian|0/Sid|locales|Default
-Ubuntu|16.04|locales|Default
-Ubuntu|18.04|locales|Default
-Ubuntu|19.10|locales|Default
-Ubuntu|20.04|locales|Default
+| Distribution | Version | Packages | Repository |
+| ------------ | ------- | -------- | ---------- |
+| Alpine       | 3.10    | N/A      | N/A        |
+| Alpine       | 3.11    | N/A      | N/A        |
+| Debian       | 8       | locales  | Default    |
+| Debian       | 9       | locales  | Default    |
+| Debian       | 10      | locales  | Default    |
+| Debian       | 0/Sid   | locales  | Default    |
+| Ubuntu       | 16.04   | locales  | Default    |
+| Ubuntu       | 18.04   | locales  | Default    |
+| Ubuntu       | 19.10   | locales  | Default    |
+| Ubuntu       | 20.04   | locales  | Default    |
 
 ## - CS_LOCALES_PACKAGES
 ### Description
@@ -615,18 +622,18 @@ String - Accepts path that points to valid timezone.
 Empty/Not set.
 ### Packages
 When activated it installs the following packages:
-Distribution|Version|Packages|Repositories
--|-|-|-
-Alpine|3.10|tzdata|Default
-Alpine|3.11|tzdata|Default
-Debian|8|tzdata|Default
-Debian|9|tzdata|Default
-Debian|10|tzdata|Default
-Debian|0/Sid|tzdata|Default
-Ubuntu|16.04|tzdata|Default
-Ubuntu|18.04|tzdata|Default
-Ubuntu|19.10|tzdata|Default
-Ubuntu|20.04|tzdata|Default
+| Distribution | Version | Packages | Repositories |
+| ------------ | ------- | -------- | ------------ |
+| Alpine       | 3.10    | tzdata   | Default      |
+| Alpine       | 3.11    | tzdata   | Default      |
+| Debian       | 8       | tzdata   | Default      |
+| Debian       | 9       | tzdata   | Default      |
+| Debian       | 10      | tzdata   | Default      |
+| Debian       | 0/Sid   | tzdata   | Default      |
+| Ubuntu       | 16.04   | tzdata   | Default      |
+| Ubuntu       | 18.04   | tzdata   | Default      |
+| Ubuntu       | 19.10   | tzdata   | Default      |
+| Ubuntu       | 20.04   | tzdata   | Default      |
 
 ## - CS_UNMINIMIZE_IMAGE
 ### Description
@@ -640,18 +647,18 @@ Boolean - Accepts "True"- and "False"-values.
 ### Default
 Empty/Not set.
 ### Supported Distributions
-Distribution|Version|Supported
--|-|-
-Alpine|3.10|No
-Alpine|3.11|No
-Debian|8|No
-Debian|9|No
-Debian|10|No
-Debian|0/Sid|No
-Ubuntu|16.04|No
-Ubuntu|18.04|Yes
-Ubuntu|19.10|Yes
-Ubuntu|20.04|Yes
+| Distribution | Version | Supported |
+| ------------ | ------- | --------- |
+| Alpine       | 3.10    | No        |
+| Alpine       | 3.11    | No        |
+| Debian       | 8       | No        |
+| Debian       | 9       | No        |
+| Debian       | 10      | No        |
+| Debian       | 0/Sid   | No        |
+| Ubuntu       | 16.04   | No        |
+| Ubuntu       | 18.04   | Yes       |
+| Ubuntu       | 19.10   | Yes       |
+| Ubuntu       | 20.04   | Yes       |
 
 ## - CS_USER_DATA_DIR
 ### Description

@@ -5,7 +5,7 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #   list of conditions and the following disclaimer.
 #
@@ -13,7 +13,7 @@
 #   this list of conditions and the following disclaimer in the documentation
 #   and/or other materials provided with the software/distribution.
 #
-# 3. If we meet some day, and you think this stuff is worth it, 
+# 3. If we meet some day, and you think this stuff is worth it,
 #    you can buy me a beer in return, Grimeton.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -46,21 +46,19 @@ function __isenabled_install_microsoft_powershell() {
     elif [[ "${__D_C_INSTALL_MICROSOFT_POWERSHELL_REGEX}x" == "x" ]]; then
         true
     else
-        declare __IMP_REGEX_PACKAGENAME="${__D_C_INSTALL_MICROSOFT_POWERSHELL_REGEX}"
+        __IMP_REGEX_PACKAGENAME="${__D_C_INSTALL_MICROSOFT_POWERSHELL_REGEX}"
     fi
 
     if [[ -z ${__D_C_INSTALL_MICROSOFT_POWERSHELL+x} ]]; then
         true
     elif [[ "${__D_C_INSTALL_MICROSOFT_POWERSHELL}x" == "x" ]]; then
-        declare __IMP_DEFAULT=""
+        __IMP_DEFAULT=""
     elif [[ "${__D_C_INSTALL_MICROSOFT_POWERSHELL}" =~ ${__IMPREGEX_PACKAGENAME} ]]; then
-        declare __IMP_DEFAULT="${__D_C_INSTALL_MICROSOFT_POWERSHELL}"
-    else
-        if __test_variable_text_true "${__D_C_INSTALL_MICROSOFT_POWERSHELL}"; then
-            declare __IMP_DEFAULT="1"
-        else
-            declare __IMP_DEFAULT=""
-        fi
+        __IMP_DEFAULT="${__D_C_INSTALL_MICROSOFT_POWERSHELL}"
+    elif __variable_text __D_C_INSTALL_MICROSOFT_POWERSHELL 1; then
+        __IMP_DEFAULT="1"
+    elif __variable_text __D_C_INSTALL_MICROSOFT_POWERSHELL 0; then
+        __IMP_DEFAULT=""
     fi
 
     if [[ -z ${__D_C_INSTALL_MICROSOFT_POWERSHELL_PACKAGE+x} ]]; then
@@ -68,7 +66,7 @@ function __isenabled_install_microsoft_powershell() {
     elif [[ "${__D_C_INSTALL_MICROSOFT_POWERSHELL_PACKAGE}x" == "x" ]]; then
         true
     elif [[ "${__D_C_INSTALL_MICROSOFT_POWERSHELL_PACKAGE}" =~ ${__IMP_REGEX_PACKAGENAME} ]]; then
-        declare __IMP_DEFAULT_PACKAGENAME="${__D_C_INSTALL_MICROSOFT_POWERSHELL_PACKAGE}"
+        __IMP_DEFAULT_PACKAGENAME="${__D_C_INSTALL_MICROSOFT_POWERSHELL_PACKAGE}"
     fi
 
     __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]="${__IMP_DEFAULT}"
@@ -78,13 +76,13 @@ function __isenabled_install_microsoft_powershell() {
         true
     elif [[ "${CS_INSTALL_MICROSOFT_POWERSHELL}" =~ ${__IMP_REGEX_PACKAGENAME} ]]; then
         __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]="${CS_INSTALL_MICROSOFT_POWERSHELL}"
-    elif __test_variable_text_true "${CS_INSTALL_MICROSOFT_POWERSHELL}"; then
+    elif __variable_text CS_INSTALL_MICROSOFT_POWERSHELL 1; then
         if [[ "${__IMP_DEFAULT}" =~ ${__IMP_REGEX_PACKAGENAME} ]]; then
             __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]="${__IMP_DEFAULT}"
         else
             __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]="${__IMP_DEFAULT_PACKAGENAME}"
         fi
-    elif __test_variable_text_false "${CS_INSTALL_MICROSOFT_POWERSHELL}"; then
+    elif __variable_text CS_INSTALL_MICROSOFT_POWERSHELL 0; then
         __SETTINGS[CS_INSTALL_MICROSOFT_POWERSHELL]=""
     fi
 

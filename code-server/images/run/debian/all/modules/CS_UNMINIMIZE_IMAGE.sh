@@ -34,11 +34,11 @@ fi
 
 function __isenabled_cs_unminimize_image() {
 
-    if __test_variable_exists CS_UNMINIMIZE_IMAGE; then
-        if __test_variable_empty CS_UNMINIMIZE_IMAGE; then
+    if __variable_exists CS_UNMINIMIZE_IMAGE; then
+        if __variable_empty CS_UNMINIMIZE_IMAGE; then
             true
         else
-            if __test_variable_text_true CS_UNMINIMIZE_IMAGE; then
+            if __variable_text CS_UNMINIMIZE_IMAGE 1; then
                 __log i -- "(CS_UNMINIMIZE_IMAGE) The CS_UNMINIMIZE_IMAGE feature is not supported on Debian."
             fi
         fi

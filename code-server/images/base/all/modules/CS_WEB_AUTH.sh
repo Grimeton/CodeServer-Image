@@ -47,8 +47,8 @@ function __isenabled_cs_web_auth() {
 
     __SETTINGS[CS_WEB_AUTH]="${__FWA_DEFAULT}"
 
-    if __test_variable_exists CS_WEB_AUTH; then
-        if __test_variable_empty CS_WEB_AUTH; then
+    if __variable_exists CS_WEB_AUTH; then
+        if __variable_empty CS_WEB_AUTH; then
             true
         else
             __SETTINGS[CS_WEB_AUTH]="${CS_WEB_AUTH}"

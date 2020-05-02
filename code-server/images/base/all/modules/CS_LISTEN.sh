@@ -146,8 +146,8 @@ function __isenabled_cs_listen() {
 
 	__log i -- "(CS_LISTEN) Configuring integrated webserver socket type...\n"
 
-	if __test_variable_exists CS_LISTEN_SOCKET; then
-		if __test_variable_empty CS_LISTEN_SOCKET; then
+	if __variable_exists CS_LISTEN_SOCKET; then
+		if __variable_empty CS_LISTEN_SOCKET; then
 			true
 		else
 			__SETTINGS[CS_LISTEN_SOCKET]="${CS_LISTEN_SOCKET}"
@@ -187,8 +187,8 @@ function __isenabled_cs_listen() {
 		fi
 	fi
 
-	if __test_variable_exists CS_LISTEN_PORT; then
-		if __test_variable_empty CS_LISTEN_PORT; then
+	if __variable_exists CS_LISTEN_PORT; then
+		if __variable_empty CS_LISTEN_PORT; then
 			true
 		elif [[ "${CS_LISTEN_PORT}" =~ ${__FWS_LISTEN_PORT_REGEX} ]]; then
 			declare -i __T_PORT=${CS_LISTEN_PORT}
@@ -222,8 +222,8 @@ function __isenabled_cs_listen() {
 		fi
 	fi
 
-	if __test_variable_exists CS_LISTEN_HOST; then
-		if __test_variable_empty CS_LISTEN_HOST; then
+	if __variable_exists CS_LISTEN_HOST; then
+		if __variable_empty CS_LISTEN_HOST; then
 			true
 		else
 			__SETTINGS[CS_LISTEN_HOST]="${CS_LISTEN_HOST}"

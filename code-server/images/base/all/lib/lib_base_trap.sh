@@ -78,7 +78,7 @@ function __trap_function_register() {
         return 111
     fi
 
-    if __test_function_exists "${__P_TFR_FUNCTIONNAME}"; then
+    if __variable_type_function "${__P_TFR_FUNCTIONNAME}"; then
         if __array_add "${!__T_TFR_SIGNAL_ARRAY}" "${__P_TFR_FUNCTIONNAME}"; then
             true
         else
@@ -395,14 +395,14 @@ function __trap_signal_name() {
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_TSN_RETURN_NAME=""
     else
-        if __test_variable_exists "${@:2:1}"; then
+        if __variable_exists "${@:2:1}"; then
             declare -n __T_TSN_RETURN_NAME="${@:2:1}"
         else
             declare __T_TSN_RETURN_NAME=""
         fi
     fi
 
-    if __test_variable_exists __P_TSN_SIGNALNAME; then
+    if __variable_exists __P_TSN_SIGNALNAME; then
         if [[ -R __T_TSN_RETURN_NAME ]]; then
             __T_TSN_RETURN_NAME="${__P_TSN_SIGNALNAME}"
         else
@@ -482,7 +482,7 @@ function __trap_signal_array_create() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_TSAC_RETURN_ARRAYNAME=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_TSAC_RETURN_ARRAYNAME="${@:2:1}"
     else
         declare __T_TSAC_RETURN_ARRAYNAME=""
@@ -591,7 +591,7 @@ function __trap_signal_arrayname_get() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_TSAG_RETURN_ARRAYNAME=""
-    elif __test_variable_exists "${@:2:1}" && [[ ${BASH_SUBSHELL} -lt 1 ]]; then
+    elif __variable_exists "${@:2:1}" && [[ ${BASH_SUBSHELL} -lt 1 ]]; then
         declare -n __T_TSAG_RETURN_ARRAYNAME="${@:2:1}"
     else
         declare __T_TSAG_RETURN_ARRAYNAME=""
@@ -667,7 +667,7 @@ function __trap_run() {
     else
         for __T_TR_FUNCTIONNAME in "${__T_TR_SIGNAL_ARRAY[@]}"; do
             __T_TR_ERROR=0
-            if __test_function_exists "${__T_TR_FUNCTIONNAME}"; then
+            if __variable_type_function "${__T_TR_FUNCTIONNAME}"; then
                 if "${__T_TR_FUNCTIONNAME}" "${__T_LAST_ERROR}"; then
                     continue
                 else

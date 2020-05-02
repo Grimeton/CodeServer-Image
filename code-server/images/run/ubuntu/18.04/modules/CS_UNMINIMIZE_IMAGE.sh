@@ -43,9 +43,9 @@ function __isenabled_feature_unminimize_image() {
         true
     elif [[ "${__D_C_UNMINIMIZE_IMAGE}x" == "x" ]]; then
         __UI_DEFAULT=""
-    elif __test_variable_text __D_C_UNMINIMIZE_IMAGE 1; then
+    elif __variable_text __D_C_UNMINIMIZE_IMAGE 1; then
         __UI_DEFEAULT="1"
-    elif __test_variable_text __D_C_UNMINIMIZE_IMAGE 0; then
+    elif __variable_text __D_C_UNMINIMIZE_IMAGE 0; then
         __UI_DEFAULT=""
     fi
 
@@ -55,9 +55,9 @@ function __isenabled_feature_unminimize_image() {
         true
     elif [[ "${CS_UNMINIMIZE_IMAGE}x" == "x" ]]; then
         true
-    elif __test_variable_text CS_UNMINIMIZE_IMAGE 1; then
+    elif __variable_text CS_UNMINIMIZE_IMAGE 1; then
         __SETTINGS[UNMINIMIZE_IMAGE]="1"
-    elif __test_variable_text CS_UNMINIMIZE_IMAGE 0; then
+    elif __variable_text CS_UNMINIMIZE_IMAGE 0; then
         __SETTINGS[UNMINIMIZE_IMAGE]=""
     fi
 

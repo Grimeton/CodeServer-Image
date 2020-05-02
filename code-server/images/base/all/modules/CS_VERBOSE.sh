@@ -42,7 +42,7 @@ function __isenabled_cs_verbose() {
         true
     elif [[ "${CS_VERBOSE}x" == "x" ]]; then
         true
-    elif __test_variable_text_true "${CS_VERBOSE}"; then
+    elif __variable_text CS_VERBOSE 1; then
         declare -gx __LOG_VERBOSE="1"
         __SETTINGS[CS_VERBOSE]=1
     else

@@ -74,7 +74,7 @@ function __microsoft_generate_repository_location() {
 
     if [[ "${@:7:1}x" == "x" ]]; then
         declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:7:1}"; then
+    elif __variable_exists "${@:7:1}"; then
         declare -n __T_RETURN_VALUE="${@:7:1}"
         __T_RETURN_VALUE=""
     else
@@ -364,7 +364,7 @@ function __microsoft_packagelists_repository_branch_get() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
         __T_RETURN_VALUE=""
     else
@@ -407,7 +407,7 @@ function __microsoft_packagelists_repository_installtype_get() {
 
     if [[ "${@:2:1}x" == "x" ]]; then
         declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:2:1}"; then
+    elif __variable_exists "${@:2:1}"; then
         declare -n __T_RETURN_VALUE="${@:2:1}"
     else
         declare __T_RETURN_VALUE=""
@@ -470,7 +470,7 @@ function __microsoft_repository_to_filename() {
     fi
     if [[ "${@:4:1}x" == "x" ]]; then
         declare __T_RETURN_VALUE=""
-    elif __test_variable_exists "${@:4:1}"; then
+    elif __variable_exists "${@:4:1}"; then
         declare -n __T_RETURN_VALUE="${@:4:1}"
     else
         declare __T_RETURN_VALUE="${@:4:1}"

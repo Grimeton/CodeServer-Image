@@ -32,6 +32,10 @@ if ! (return 0 2>/dev/null); then
     exit 254
 fi
 
+set -o nounset
+
+declare -gx __ENVIRONMENT_LOADED=1
+
 #####
 #
 # - __environment_save
@@ -59,7 +63,7 @@ function __environment_save() {
     declare -a __P_ES_VARIABLES=("${@}")
 
     for __T_VARIABLE in "${__P_ES_VARIABLES[@]}"; do
-        if __test_variable_exists "${__T_VARIABLE}"; then
+        if __variable_exists "${__T_VARIABLE}"; then
             declare -p "${__T_VARIABLE}"
         fi
     done
