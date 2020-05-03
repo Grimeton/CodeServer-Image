@@ -844,7 +844,7 @@ function __lib_require() {
         return 0
     fi
 
-    declare __T_LOAD_OPTIONS=()
+    declare -a __T_LOAD_OPTIONS=()
     if [[ "${G_LIB_STAGE}" == "build" ]]; then
         __T_LOAD_OPTIONS+=("${ID}" "${VERSION_ID}" "base" "build")
     fi
@@ -860,3 +860,5 @@ function __lib_require() {
     return 0
 
 }
+
+
