@@ -59,52 +59,16 @@ done
 
 declare __T_CONFIG_FILE="${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}"
 if [[ -f "${__T_CONFIG_FILE}" ]]; then
-    true
-
+    if source "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}"; then
+        __log i -- "Configuration loaded successfully.\n"
+    else
+        __log e -- "Could not source the configuration. Exiting.\n"
+        exit 252
+    fi
 else
     __log e -- "Cannot find configuration.\n"
     exit 253
 fi
-
-# setup some basic stuff.
-# let's see what config files we have....
-declare -a GLOBAL_CONFIG_FILES=()
-for __T_CF in "/config/config.sh" "${G_BASE_DIR%%/}/config.sh" "${__T_CONFIG_FILE}"; do
-    if [[ -f "${__T_CF}" ]]; then
-        GLOBAL_CONFIG_FILES+=("${__T_CF}")
-    fi
-done
-
-# check if we have a configuration....
-#
-(for __T_CF in "${GLOBAL_CONFIG_FILES[@]}"; do
-
-    if [[ -f "${__T_CF}" ]]; then
-        echo ""
-        echo "####"
-        echo "# START: "${__T_CF}""
-        cat "${__T_CF}"
-        echo ""
-        echo "# END: "${__T_CF}""
-        echo "####"
-    fi
-done) >"${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}"
-
-##
-# if the file doesn't exist....
-if [[ ! -f "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}" ]]; then
-    __log e -- "Could not find build config. exiting.\n"
-    exit 251
-fi
-
-# load the config
-if ! source "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}"; then
-    __log e -- "Could not source the configuration. Exiting.\n"
-    exit 252
-fi
-
-# i love it...
-declare __T_CONFIG_VERIFY_FILE=
 
 ###
 #
