@@ -157,7 +157,10 @@ if ! __environment_save_file "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}" "__CONFIG
 fi
 
 if [[ -n ${DOCKER_HOST:+x} ]]; then
-    declare -gx DOCKER_HOST
+    __log i -- "DOCKER_HOST: '${DOCKER_HOST}'.\n"
+    declare -gx DOCKER_HOST="${DOCKER_HOST}"
+else
+    __log e -- "DOCKER_HOST NOT SET.\n"
 fi
 
 ###
