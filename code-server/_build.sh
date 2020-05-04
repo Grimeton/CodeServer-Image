@@ -151,7 +151,7 @@ fi
 unset __PARAM_FILE __T_CF __T_CONFIG_FILE __T_CONFIG_VERIFY_FILE GLOBAL_CONFIG_FILES
 
 # let's create a clean configuration.
-if ! __environment_save_file "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}" "__CONFIG" "__LOG_DEBUG"; then
+if ! __environment_save_file "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}" "__CONFIG" "__LOG_DEBUG" "DOCKER_HOST" "JENKINS_HOME"; then
     __log e -- "Could not save environment to new configuration file. Exiting.\n"
     exit 252
 fi
@@ -270,20 +270,37 @@ fi
 #
 # Let's dance
 #
-if env -i docker run \
-    --interactive \
-    --network host \
-    --tty \
-    --volume /var/run/docker.sock:/var/run/docker.sock \
-    ${__START_IMAGE_PACKAGES_PATH} \
-    "${__START_IMAGE_TAG}" \
-    "${__CONFIG[BUILD_STAGING_DIRECTORY]%%/}/images/build/build.sh"; then
-    __log i -- "Building the runtime successful.\n"
-    exit 0
+if [[ -z ${JENKINS_HOME:+x} ]]; then
+    if env -i docker run \
+        --interactive \
+        --network host \
+        --tty \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        ${__START_IMAGE_PACKAGES_PATH} \
+        "${__START_IMAGE_TAG}" \
+        "${__CONFIG[BUILD_STAGING_DIRECTORY]%%/}/images/build/build.sh"; then
+        __log i -- "Building the runtime successful.\n"
+        exit 0
+    else
+        __T_ERROR=$?
+        __log e -- "Could not run build stage. Exiting (${__T_ERROR}).\n"
+        exit ${__T_ERROR}
+    fi
 else
-    __T_ERROR=$?
-    __log e -- "Could not run build stage. Exiting (${__T_ERROR}).\n"
-    exit ${__T_ERROR}
+    if env -i docker run \
+        --interactive \
+        --network host \
+        --tty \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        ${__START_IMAGE_PACKAGES_PATH} \
+        "${__START_IMAGE_TAG}" \
+        "${__CONFIG[BUILD_STAGING_DIRECTORY]%%/}/images/build/build.sh"; then
+        __log i -- "Building the runtime successful.\n"
+        exit 0
+    else
+        __T_ERROR=$?
+        __log e -- "Could not run build stage. Exiting (${__T_ERROR}).\n"
+        exit ${__T_ERROR}
+    fi
 fi
-
 unset __START_IMAGE_PACKAGES_PATH __START_IMAGE_TAG

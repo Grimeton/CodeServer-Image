@@ -157,6 +157,14 @@ if [[ -f "${__T_CONFIGURATION_FILE}" ]]; then
         echo "GLOBAL_CONFIG_VERIFY_PUBLIC=${__T_GLOBAL_CONFIG_VERIFY_PUBLIC}" >>"${__T_TEMP_FILE}"
     fi
 
+    if [[ -n ${JENKINS_HOME:+x} ]]; then
+        echo "JENKINS_HOME=\"${JENKINS_HOME}\"" >> "${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${DOCKER_HOST:+x} ]]; then
+        echo "DOCKER_HOST=\"${DOCKER_HOST}\"" >> "${__T_TEMP_FILE}"
+    fi
+
+
     if [[ ${#__T_VARS} -gt 0 ]]; then
         for __T_VAR in "${__T_VARS[@]}"; do
             echo "${__T_VAR}" >>"${__T_TEMP_FILE}"
