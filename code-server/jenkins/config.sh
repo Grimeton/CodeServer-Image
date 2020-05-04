@@ -71,7 +71,11 @@ if [[ "${@:1:1}x" != "x" ]]; then
         __log e - "'${@:1:1}' is not a file. Exiting.\n"
         exit 99
     fi
+else
+    __log e -- "No parameter file.\n"
+    exit 199
 fi
+
 
 # setup some basic stuff.
 # let's see what config files we have....
