@@ -109,11 +109,6 @@ done
 unset __CONFIG_KEYS_SORTED
 __log_banner_end i -- ""
 
-if [[ "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}" ]]; then
-    rm -f "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}"
-    unset GLOBAL_CONFIG_FILENAME
-fi
-
 ###
 #
 # Let's dance
