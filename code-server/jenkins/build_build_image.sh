@@ -68,6 +68,8 @@ else
     __log e -- "Cannot find the configuration file. Exiting ($?).\n"
 fi
 
+declare __T_BUILDFS_STAGING_DIRECTORY="${__CONFIG[__BUILD_ROOTLAYOUT_BASEDIRECTORY]}"
+
 # Most significant one wins
 #
 declare __BUILD_DOCKER_FILE=""
