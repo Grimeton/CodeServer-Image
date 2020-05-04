@@ -1,9 +1,18 @@
 pipeline {
     agent any
+    environment {
+        DOCKER_HOST = "tcp://10.1.1.42:2375"
+    }
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        stage('Configure') {
+            steps {
+                
+                sh "${WORKSPACE}/code-server/jenkins/configure.sh -d ubuntu -e 16.04 -g 99.99 -x -y"
             }
         }
         stage('GatherConfiguration') {

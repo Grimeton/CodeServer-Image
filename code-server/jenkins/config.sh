@@ -57,30 +57,19 @@ for __T_PACKAGE in "base_trap" "rootlayout"; do
     fi
 done
 
-declare __T_CONFIG_FILE=""
-###
-#
-# check if we have a parameter handed to us.
-# If the parameter turns into a file, we use it for configuration
-#
-if [[ "${@:1:1}x" != "x" ]]; then
-    if [[ -f "${@:1:1}" ]]; then
-        __log i - "Using '${@:1:1}'.\n"
-        declare __PARAM_FILE="$(realpath "${@:1:1}")"
-    else
-        __log e - "'${@:1:1}' is not a file. Exiting.\n"
-        exit 99
-    fi
-else
-    __log e -- "No parameter file.\n"
-    exit 199
-fi
+declare __T_CONFIG_FILE="${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}"
+if [[ -f "${__T_CONFIG_FILE}" ]]; then
+    true
 
+else
+    __log e -- "Cannot find configuration.\n"
+    exit 253
+fi
 
 # setup some basic stuff.
 # let's see what config files we have....
 declare -a GLOBAL_CONFIG_FILES=()
-for __T_CF in "/config/config.sh" "${G_BASE_DIR%%/}/config.sh" "${__PARAM_FILE}" "${__T_CONFIG_FILE}"; do
+for __T_CF in "/config/config.sh" "${G_BASE_DIR%%/}/config.sh" "${__T_CONFIG_FILE}"; do
     if [[ -f "${__T_CF}" ]]; then
         GLOBAL_CONFIG_FILES+=("${__T_CF}")
     fi

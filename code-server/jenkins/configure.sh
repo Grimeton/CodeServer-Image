@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+#
+#
+# Copyright (c) 2020, <grimeton@gmx.net>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the software/distribution.
+#
+# 3. If we meet some day, and you think this stuff is worth it,
+#    you can buy me a beer in return, Grimeton.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+declare -r __T_BASE_DIR="$(dirname "$(realpath "${0}")")/.."
+declare -a __T_VARS=()
+while read line; do unset "${line}"; done < <(set | grep -E '^(__D_|__INIT_|__LIB__|G_|GLOBAL_|RUN_|BUILD_|C_|CS_).*' | awk -F "=" '{print $1}')
+
+function __show_usage() {
+
+    echo "Usage: '${0}'"
+    echo ""
+    echo "-b [build stage build version] - A version string. E.g. 0.01 1.2"
+    echo "-c [directory] - Path to the configuration directory."
+    echo "-d [distribution id] - The distribution id. Usually 'alpine','debian','ubuntu',..."
+    echo "-e [distribution version] - The distribution version. e.g. 18.04 or 9"
+    echo "-g [global build version] - A version string. E.g. 0.01 1.2"
+    echo "-h [global image name] - A string representing an image e.g. \"debian:8\""
+    echo "-i [build image name] - A string representing an image e.g. \"debian:8\""
+    echo "-j [run image name] - A string representing an image e.g. \"debian:8\""
+    echo "-r [run stage build version] - A version string E.g. 0.01 1.2"
+    echo "-s [version suffix] - A string representing a suffix, e.g.: \"slim\""
+    echo "-t [type] - The type you want to create, e.g. docker, package, snap"
+    echo "-x - Disable public pushes globally."
+    echo "-y - Disable generation of public tags."
+    echo "-z [BUILD VARIABLE]=[VALUE] - A variable/value combination that will be put into the config file."
+    echo ""
+    return 0
+}
+
+while getopts :b:c:d:e:g:h:i:j:r:s:t:xyz: __OPTION; do
+
+    case "${__OPTION}" in
+    b) __T_BUILD_BUILDVERSION="${OPTARG}" ;;
+    c) __T_CONFIGURATION_DIRECTORY="${OPTARG}" ;;
+    d) __T_ID="${OPTARG}" ;;
+    e) __T_VERSIONID="${OPTARG}" ;;
+    g) __T_GLOBAL_BUILDVERSION="${OPTARG}" ;;
+    h) __T_GLOBAL_IMAGE_NAME="${OPTARG}" ;;
+    i) __T_BUILD_IMAGE_NAME="${OPTARG}" ;;
+    j) __T_RUN_IMAGE_NAME="${OPTARG}" ;;
+    r) __T_RUN_BUILDVERSION="${OPTARG}" ;;
+    s) __T_VERSION_SUFFIX="${OPTARG}" ;;
+    t) __T_TYPE="${OPTARG}" ;;
+    x) __T_GLOBAL_PUSH_OVERRIDE=1 ;;
+    y) __T_GLOBAL_CONFIG_VERIFY_PUBLIC=0 ;;
+    z) __T_VARS+=("${OPTARG}") ;;
+    ?)
+        __show_usage
+        exit 11
+        ;;
+    esac
+
+done
+
+if [[ -z ${__T_CONFIGRATION_DIRECTORY+x} ]] || [[ "${__T_CONFIGURATION_DIRECTORY}x" == "x" ]]; then
+    if [[ -d "${__T_BASE_DIR}/configs" ]]; then
+        declare -r __T_CONFIGURATION_DIRECTORY="${__T_BASE_DIR}/configs"
+    else
+        echo "Cannot find configuration directory."
+        exit 4
+    fi
+elif [[ ! -d "${__T_CONFIGURATION_DIRECTORY}" ]]; then
+    echo "'${__T_CONFIGURATION_DIRECTORY}' is not a directory."
+    exit 5
+fi
+
+if [[ -z ${__T_ID+x} ]] || [[ "${__T_ID}x" == "x" ]]; then
+
+    echo "Distribution ID required." >&2
+    __show_usage
+    exit 1
+fi
+
+if [[ -z ${__T_VERSIONID+x} ]] || [[ "${__T_VERSIONID}x" == "x" ]]; then
+    echo "Distribution version required." >&2
+    __show_usage
+    exit 2
+fi
+if [[ -z ${__T_TYPE+x} ]]; then
+    declare __T_TYPE="docker"
+    declare -r __T_CONFIGURATION_FILE="${__T_CONFIGURATION_DIRECTORY}/${__T_ID,,}/${__T_VERSIONID,,}/docker.sh"
+elif [[ "${__T_TYPE,,}" == "docker" ]]; then
+    declare __T_TYPE="docker"
+    declare -r __T_CONFIGURATION_FILE="${__T_CONFIGURATION_DIRECTORY}/${__T_ID,,}/${__T_VERSIONID,,}/docker.sh"
+elif [[ "${__T_TYPE,,}" == "pdebian" ]]; then
+    declare __T_TYPE="pdebian"
+    echo "'${__T_TYPE}' not implemented yet."
+    exit 253
+elif [[ "${__T_TYPE,,}" == "pubuntu" ]]; then
+    declare __T_TYPE="pubuntu"
+    echo "'${__T_TYPE}' not implemented yet."
+    exit 253
+elif [[ "${__T_TYPE,,}" == "snap" ]]; then
+    declare __T_TYPE="snap"
+    echo "'${__T_TYPE}' not implemented yet."
+    exit 253
+else
+    echo "Type: '${__T_TYPE}' is unknown."
+    exit 254
+fi
+
+if [[ -f "${__T_CONFIGURATION_FILE}" ]]; then
+    __T_TEMP_FILE="${__T_BASE_DIR}/jenkins/.config"
+    cat "${__T_CONFIGURATION_FILE}" >"${__T_TEMP_FILE}"
+
+    if [[ -n ${__T_BUILD_BUILDVERSION+x} ]]; then
+        echo "BUILD_BUILDVERSION=\"${__T_BUILD_BUILDVERSION}\"" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_GLOBAL_BUILDVERSION+x} ]]; then
+        echo "GLOBAL_BUILDVERSION=\"${__T_GLOBAL_BUILDVERSION}\"" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_RUN_BUILDVERSION+x} ]]; then
+        echo "RUN_BUILDVERSION=\"${__T_RUN_BUILDVERSION}\"" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_VERSION_SUFFIX+x} ]]; then
+        echo "GLOBAL_BUILDVERSION_SUFFIX=\"${__T_VERSION_SUFFIX}\"" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_GLOBAL_IMAGE_NAME+x} ]]; then
+        echo "GLOBAL_DOCKER_ARG_FROM=\"${__T_GLOBAL_IMAGE_NAME}\"" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_BUILD_IMAGE_NAME+x} ]]; then
+        echo "BUILD_DOCKER_ARG_FROM=\"${__T_BUILD_IMAGE_NAME}\"" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_RUN_IMAGE_NAME+x} ]]; then
+        echo "RUN_DOCKER_ARG_FROM=\"${__T_RUN_IMAGE_NAME}\"" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_GLOBAL_PUSH_OVERRIDE+x} ]]; then
+        echo "GLOBAL_PUSH_OVERRIDE=1" >>"${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${__T_GLOBAL_CONFIG_VERIFY_PUBLIC} ]]; then
+        echo "GLOBAL_CONFIG_VERIFY_PUBLIC=${__T_GLOBAL_CONFIG_VERIFY_PUBLIC}" >>"${__T_TEMP_FILE}"
+    fi
+
+    if [[ -n ${JENKINS_HOME:+x} ]]; then
+        echo "JENKINS_HOME=\"${JENKINS_HOME}\"" >> "${__T_TEMP_FILE}"
+    fi
+    if [[ -n ${DOCKER_HOST:+x} ]]; then
+        echo "DOCKER_HOST=\"${DOCKER_HOST}\"" >> "${__T_TEMP_FILE}"
+    fi
+
+
+    if [[ ${#__T_VARS} -gt 0 ]]; then
+        for __T_VAR in "${__T_VARS[@]}"; do
+            echo "${__T_VAR}" >>"${__T_TEMP_FILE}"
+        done
+    fi
+
+    exit 0
+else
+    echo "Cannot find configuration for distribution '${__T_ID}' and version '${__T_VERSIONID}'."
+    exit 10
+fi
