@@ -1,0 +1,22 @@
+---
+resources:
+  - name: CodeServer-Image
+    type: git
+    source:
+      uri: https://t.fullmesh.de/gitea/ol/CodeServer-Image.git
+      branch: devel
+      submodule_credentials:
+      - host: "t.fullmesh.de"
+        username: ((gitea_username))
+        password: ((gitea_password))
+
+jobs:
+  - name: job-basic-test
+    public: true
+    plan:
+      - get: CodeServer-Image
+      - task: basic-test
+        run:
+            path: code-server/jenkins/configure.sh
+            args: ["-d","ubuntu","-e", "16.04", "-g", "44.44", "-x", "-y"]
+            
