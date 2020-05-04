@@ -156,6 +156,10 @@ if ! __environment_save_file "${G_BASE_DIR}/${GLOBAL_CONFIG_FILENAME}" "__CONFIG
     exit 252
 fi
 
+if [[ -n ${DOCKER_HOST:+x} ]]; then
+    declare -gx DOCKER_HOST
+fi
+
 ###
 # create necessary directory and file definitions
 #
