@@ -288,9 +288,7 @@ if [[ -z ${JENKINS_HOME:+x} ]]; then
     fi
 else
     if env -i docker run \
-        --interactive \
         --network host \
-        --tty \
         --volume /var/run/docker.sock:/var/run/docker.sock \
         ${__START_IMAGE_PACKAGES_PATH} \
         "${__START_IMAGE_TAG}" \
