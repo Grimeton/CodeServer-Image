@@ -1,24 +1,29 @@
 pipeline {
     agent any
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('GatherConfiguration') {
             steps {
-                "${WORKSPACE}/code-server/jenkins/config.sh"
+                sh "${WORKSPACE}/code-server/jenkins/config.sh"
             }
         }
         stage('CreateRootlayout') {
             steps {
-                "${WORKSPACE}/code-server/jenkins/rootlayout.sh"
+                sh "${WORKSPACE}/code-server/jenkins/rootlayout.sh"
             }
         }
         stage('Build_BUILDIMAGE') {
             steps {
-                "${WORKSPACE}/code-server/jenkins/build_build_image.sh"
+                sh "${WORKSPACE}/code-server/jenkins/build_build_image.sh"
             }
         }
         stage('Build_VSCODE') {
             steps {
-                "${WORKSPACE}/code-server/jenkins/build_vscode.sh"
+                sh "${WORKSPACE}/code-server/jenkins/build_vscode.sh"
             }
         }
     }
